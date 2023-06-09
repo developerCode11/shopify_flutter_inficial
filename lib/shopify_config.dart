@@ -50,11 +50,11 @@ class ShopifyConfig {
     _storeUrl = !storeUrl.contains('http') ? 'https://$storeUrl' : storeUrl;
     _storefrontApiVersion = storefrontApiVersion;
     _graphQLClient = GraphQLClient(
-      link: HttpLink(
-        '$_storeUrl/api/$_storefrontApiVersion/graphql.json',
-        defaultHeaders: {
-          'X-Shopify-Storefront-Access-Token': _storefrontAccessToken!,
-        },
+      link: AuthLink(
+        headerKey: 'X-Shopify-Storefront-Access-Token',
+        getToken: () async => _storefrontAccessToken,
+      ).concat(
+        HttpLink('$_storeUrl/api/$_storefrontApiVersion/graphql.json'),
       ),
       cache: GraphQLCache(),
     );
