@@ -114,7 +114,9 @@ class ShopifyStore with ShopifyError {
     }
 
     final QueryOptions _options = WatchQueryOptions(
-        document: gql(getProductsByIdsQuery), variables: variables);
+        fetchPolicy: FetchPolicy.networkOnly,
+        document: gql(getProductsByIdsQuery),
+        variables: variables);
     final QueryResult result = await _graphQLClient!.query(_options);
     checkForError(result);
     var response = result.data!;
