@@ -95,10 +95,10 @@ class ShopifyStore with ShopifyError {
   ///
   /// Returns the Products associated to the given id's in [idList]
   Future<List<Product>?> getProductsByIds(
-    List<String> idList,
+    List<String> idList, {
     String? langCode,
     String? countryCode,
-  ) async {
+  }) async {
     List<Product>? productList = [];
 
     Map<String, dynamic> variables = <String, dynamic>{
