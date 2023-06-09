@@ -48,6 +48,7 @@ class ShopifyStore with ShopifyError {
     WatchQueryOptions _options;
     do {
       _options = WatchQueryOptions(
+        fetchPolicy: FetchPolicy.networkOnly,
         document: gql(getProductsQuery),
         variables: {
           'cursor': cursor,
