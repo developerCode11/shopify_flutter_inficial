@@ -104,6 +104,7 @@ class ShopifyStore with ShopifyError {
     Map<String, dynamic> variables = <String, dynamic>{
       'ids': idList,
     };
+    print(langCode);
     if (langCode != null) {
       variables['langCode'] = langCode;
     }
