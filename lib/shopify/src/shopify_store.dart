@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:shopify_flutter/enums/enums.dart';
 import 'package:shopify_flutter/enums/src/sort_key_collection.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_collections_optimized.dart';
@@ -20,7 +21,6 @@ import 'package:shopify_flutter/models/src/product/metafield/metafield.dart';
 import 'package:shopify_flutter/models/src/product/product.dart';
 import 'package:shopify_flutter/models/src/product/products/products.dart';
 import 'package:shopify_flutter/models/src/shop/shop.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../../graphql_operations/storefront/queries/get_featured_collections.dart';
 import '../../graphql_operations/storefront/queries/get_n_products.dart';
@@ -96,10 +96,23 @@ class ShopifyStore with ShopifyError {
   /// Returns the Products associated to the given id's in [idList]
   Future<List<Product>?> getProductsByIds(
     List<String> idList,
+    String? langCode,
+    String? countryCode,
   ) async {
     List<Product>? productList = [];
+
+    Map<String, dynamic> variables = <String, dynamic>{
+      'ids': idList,
+    };
+    if (langCode != null) {
+      variables['langCode'] = langCode;
+    }
+    if (countryCode != null) {
+      variables['countryCode'] = countryCode;
+    }
+
     final QueryOptions _options = WatchQueryOptions(
-        document: gql(getProductsByIdsQuery), variables: {'ids': idList});
+        document: gql(getProductsByIdsQuery), variables: variables);
     final QueryResult result = await _graphQLClient!.query(_options);
     checkForError(result);
     var response = result.data!;
@@ -238,21 +251,32 @@ class ShopifyStore with ShopifyError {
   /// Returns all available collections.
   ///
   /// Tip: When editing Collections you can choose on which channel or app you want to make them available.
-  Future<List<Collection>> getAllCollections(
-      {SortKeyCollection sortKeyCollection = SortKeyCollection.UPDATED_AT,
-      bool reverse = false}) async {
+  Future<List<Collection>> getAllCollections({
+    SortKeyCollection sortKeyCollection = SortKeyCollection.UPDATED_AT,
+    bool reverse = false,
+    String? langCode,
+    String? countryCode,
+  }) async {
     List<Collection> collectionList = [];
     Collections tempCollection;
     String? cursor;
     WatchQueryOptions _options;
     do {
+      Map<String, dynamic> variables = <String, dynamic>{
+        'cursor': cursor,
+        'sortKey': sortKeyCollection.parseToString(),
+        'reverse': reverse,
+      };
+      if (langCode != null) {
+        variables['langCode'] = langCode;
+      }
+      if (countryCode != null) {
+        variables['countryCode'] = countryCode;
+      }
       _options = WatchQueryOptions(
-          document: gql(getAllCollectionsOptimizedQuery),
-          variables: {
-            'cursor': cursor,
-            'sortKey': sortKeyCollection.parseToString(),
-            'reverse': reverse
-          });
+        document: gql(getAllCollectionsOptimizedQuery),
+        variables: variables,
+      );
       final QueryResult result = await _graphQLClient!.query(_options);
       checkForError(result);
       tempCollection = (Collections.fromGraphJson(

@@ -1,6 +1,6 @@
 /// Query to get products by ids
 const String getProductsByIdsQuery = r'''
-query($ids : [ID!]!){
+query($ids : [ID!]!, $langCode: LanguageCode, $countryCode: CountryCode) @inContext(language: $langCode, country: $countryCode) {
   nodes(ids: $ids) {
     ... on Product {
     options(first: 50) {
