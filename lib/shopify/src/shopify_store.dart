@@ -1,13 +1,14 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:shopify_flutter/enums/enums.dart';
 import 'package:shopify_flutter/enums/src/sort_key_collection.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_collections_optimized.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_products_from_collection_by_id.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_products_on_query.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_collections_by_ids.dart';
-import 'package:shopify_flutter/graphql_operations/storefront/queries/get_metafileds_from_product.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_product_recommendations.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_products_by_ids.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_shop.dart';
@@ -588,19 +589,131 @@ class ShopifyStore with ShopifyError {
   /// Returns a List of [Metafield].
   ///
   /// Gets [Metafield]s of [Product] optionally filtered by namespace.
-  Future<List<Metafield>> getMetafieldsFromProduct(
-      String productHandle, String namespace,
-      {FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork}) async {
-    final WatchQueryOptions _options = WatchQueryOptions(
-        fetchPolicy: fetchPolicy,
-        document: gql(getMetafieldsFromProductQuery),
-        variables: {'handle': productHandle, 'namespace': namespace});
-    final QueryResult result =
-        await ShopifyConfig.graphQLClient!.query(_options);
-    checkForError(result);
-    return (result.data!['productByHandle']['metafields']['edges']
-            as List<Object>)
-        .map((e) => Metafield.fromGraphJson(e as Map<String, dynamic>))
-        .toList();
+  Future<List<Metafield>> getMetaFieldsFromProduct(String productId) async {
+    List<Metafield> metafields = [];
+    try {
+      http.Response response = await http.get(
+        Uri.parse(
+            "https://${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields.json"),
+        headers: {
+          'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
+        },
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        metafields = (data['metafields'] as List)
+            .map((e) => Metafield.fromJson(e))
+            .toList();
+      }
+    } catch (e) {
+      log(e.toString());
+      return [];
+    }
+    return metafields;
+  }
+
+  /// Returns a specific [Metafield] from [productId] and [metaFieldId].
+  ///
+  Future<Metafield?> getMetaFieldsFromMetaField(
+      String productId, String metaFieldId) async {
+    try {
+      http.Response response = await http.get(
+        Uri.parse(
+            "https://${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields/$metaFieldId.json"),
+        headers: {
+          'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
+        },
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return Metafield.fromJson(data['metafield']);
+      }
+    } catch (e) {
+      log(e.toString());
+      return null;
+    }
+    return null;
+  }
+
+  Future<Metafield?> createMetaFieldForProduct(String productId,
+      String namespace, String key, String value, String type) async {
+    try {
+      http.Response response = await http.post(
+        Uri.parse(
+            "https://${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields.json"),
+        body: {
+          "metafield": {
+            "namespace": namespace,
+            "key": key,
+            "value": value,
+            "type": type
+          }
+        },
+        headers: {
+          'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
+        },
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return Metafield.fromJson(data['metafield']);
+      }
+    } catch (e) {
+      log(e.toString());
+      return null;
+    }
+    return null;
+  }
+
+  Future<Metafield?> updateMetaFieldsFromMetaField(
+      String productId,
+      String metaFieldId,
+      String namespace,
+      String key,
+      String value,
+      String type) async {
+    try {
+      http.Response response = await http.put(
+        Uri.parse(
+            "https://${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields/$metaFieldId.json"),
+        body: {
+          "metafield": {
+            "namespace": namespace,
+            "key": key,
+            "value": value,
+            "type": type
+          }
+        },
+        headers: {
+          'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
+        },
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return Metafield.fromJson(data['metafield']);
+      }
+    } catch (e) {
+      log(e.toString());
+      return null;
+    }
+    return null;
+  }
+
+  Future<bool> deleteMetaFieldsFromMetaField(
+      String productId, String metaFieldId) async {
+    try {
+      http.Response response = await http.delete(
+        Uri.parse(
+            "https://${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields/$metaFieldId.json"),
+        headers: {
+          'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
+        },
+      );
+      if (response.statusCode == 200) {
+        return true;
+      }
+    } catch (e) {
+      return false;
+    }
+    return false;
   }
 }
