@@ -1,6 +1,6 @@
 /// Query to get n products
 const String getNProductsQuery = r'''
-query($n : Int, $sortKey : ProductSortKeys, $reverse: Boolean){
+query($n : Int, $sortKey : ProductSortKeys, $reverse: Boolean, $langCode: LanguageCode, $countryCode: CountryCode) @inContext(language: $langCode, country: $countryCode){
   products(first: $n, sortKey: $sortKey, reverse: $reverse) {
     pageInfo {
       hasNextPage

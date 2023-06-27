@@ -39,21 +39,30 @@ class ShopifyStore with ShopifyError {
   /// Returns a List of [Product].
   ///
   /// Simply returns all Products from your Store.
-  Future<List<Product>> getAllProducts({
-    String? metafieldsNamespace,
-  }) async {
+  Future<List<Product>> getAllProducts(
+      {String? metafieldsNamespace,
+      FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+      String? langCode,
+      String? countryCode}) async {
     List<Product> productList = [];
     Products tempProduct;
     String? cursor;
     WatchQueryOptions _options;
     do {
+      var variables = <String, dynamic>{
+        'cursor': cursor,
+        'metafieldsNamespace': metafieldsNamespace,
+      };
+      if (langCode != null) {
+        variables['langCode'] = 'EN';
+      }
+      if (countryCode != null) {
+        variables['countryCode'] = 'IN';
+      }
       _options = WatchQueryOptions(
-        fetchPolicy: FetchPolicy.networkOnly,
+        fetchPolicy: fetchPolicy,
         document: gql(getProductsQuery),
-        variables: {
-          'cursor': cursor,
-          'metafieldsNamespace': metafieldsNamespace,
-        },
+        variables: variables,
       );
       final QueryResult result = await _graphQLClient!.query(_options);
       checkForError(result);
@@ -72,18 +81,29 @@ class ShopifyStore with ShopifyError {
   /// [limit] has to be in the range of 0 and 250.
   Future<List<Product>> getXProductsAfterCursor(int limit, String startCursor,
       {bool reverse = false,
-      SortKeyProduct sortKeyProduct = SortKeyProduct.TITLE}) async {
+      SortKeyProduct sortKeyProduct = SortKeyProduct.TITLE,
+      FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+      String? langCode,
+      String? countryCode}) async {
     List<Product> productList = [];
     Products tempProduct;
     String cursor = startCursor;
+    var variables = <String, dynamic>{
+      'x': limit,
+      'cursor': cursor,
+      'reverse': reverse,
+      'sortKey': sortKeyProduct.parseToString()
+    };
+    if (langCode != null) {
+      variables['langCode'] = 'EN';
+    }
+    if (countryCode != null) {
+      variables['countryCode'] = 'IN';
+    }
     final WatchQueryOptions _options = WatchQueryOptions(
+        fetchPolicy: fetchPolicy,
         document: gql(getXProductsAfterCursorQuery),
-        variables: {
-          'x': limit,
-          'cursor': cursor,
-          'reverse': reverse,
-          'sortKey': sortKeyProduct.parseToString()
-        });
+        variables: variables);
     final QueryResult result = await _graphQLClient!.query(_options);
     checkForError(result);
     tempProduct =
@@ -95,17 +115,15 @@ class ShopifyStore with ShopifyError {
   /// Returns a List of [Product].
   ///
   /// Returns the Products associated to the given id's in [idList]
-  Future<List<Product>?> getProductsByIds(
-    List<String> idList, {
-    String? langCode,
-    String? countryCode,
-  }) async {
+  Future<List<Product>?> getProductsByIds(List<String> idList,
+      {String? langCode,
+      String? countryCode,
+      FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork}) async {
     List<Product>? productList = [];
 
     Map<String, dynamic> variables = <String, dynamic>{
       'ids': idList,
     };
-    print(langCode);
     if (langCode != null) {
       variables['langCode'] = langCode;
     }
@@ -114,7 +132,7 @@ class ShopifyStore with ShopifyError {
     }
 
     final QueryOptions _options = WatchQueryOptions(
-        fetchPolicy: FetchPolicy.networkOnly,
+        fetchPolicy: fetchPolicy,
         document: gql(getProductsByIdsQuery),
         variables: variables);
     final QueryResult result = await _graphQLClient!.query(_options);
@@ -145,15 +163,26 @@ class ShopifyStore with ShopifyError {
   ///  SortKey.RELEVANCE,
   Future<List<Product>?> getNProducts(int n,
       {bool? reverse,
-      SortKeyProduct sortKey = SortKeyProduct.PRODUCT_TYPE}) async {
+      SortKeyProduct sortKey = SortKeyProduct.PRODUCT_TYPE,
+      FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+      String? langCode,
+      String? countryCode}) async {
     List<Product>? productList = [];
+    Map<String, dynamic> variables = <String, dynamic>{
+      'n': n,
+      'sortKey': sortKey.parseToString(),
+      'reverse': reverse,
+    };
+    if (langCode != null) {
+      variables['langCode'] = langCode;
+    }
+    if (countryCode != null) {
+      variables['countryCode'] = countryCode;
+    }
     final WatchQueryOptions _options = WatchQueryOptions(
+      fetchPolicy: fetchPolicy,
       document: gql(getNProductsQuery),
-      variables: {
-        'n': n,
-        'sortKey': sortKey.parseToString(),
-        'reverse': reverse,
-      },
+      variables: variables,
     );
     final QueryResult result = await _graphQLClient!.query(_options);
     checkForError(result);
@@ -165,12 +194,24 @@ class ShopifyStore with ShopifyError {
 
   /// Returns a list of recommended [Product] by given id.
   Future<List<Product>?> getProductRecommendations(
-    String productId,
-  ) async {
+    String productId, {
+    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+    String? langCode,
+    String? countryCode,
+  }) async {
     try {
+      Map<String, dynamic> variables = <String, dynamic>{'id': productId};
+      if (langCode != null) {
+        variables['langCode'] = langCode;
+      }
+      if (countryCode != null) {
+        variables['countryCode'] = countryCode;
+      }
       final WatchQueryOptions _options = WatchQueryOptions(
-          document: gql(getProductRecommendationsQuery),
-          variables: {'id': productId});
+        fetchPolicy: fetchPolicy,
+        document: gql(getProductRecommendationsQuery),
+        variables: variables,
+      );
       final QueryResult result = await _graphQLClient!.query(_options);
       checkForError(result);
       var newResponse = List.generate(
@@ -189,11 +230,26 @@ class ShopifyStore with ShopifyError {
 
   /// Returns a List of [Collection]
   Future<List<Collection>?> getCollectionsByIds(
-    List<String> idList,
-  ) async {
+    List<String> idList, {
+    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+    String? langCode,
+    String? countryCode,
+  }) async {
     try {
+      Map<String, dynamic> variables = <String, dynamic>{
+        'ids': idList,
+      };
+      if (langCode != null) {
+        variables['langCode'] = langCode;
+      }
+      if (countryCode != null) {
+        variables['countryCode'] = countryCode;
+      }
       final WatchQueryOptions _options = WatchQueryOptions(
-          document: gql(getCollectionsByIdsQuery), variables: {'ids': idList});
+        fetchPolicy: fetchPolicy,
+        document: gql(getCollectionsByIdsQuery),
+        variables: variables,
+      );
       final QueryResult result = await _graphQLClient!.query(_options);
       checkForError(result);
       var newResponse = List.generate(result.data!['nodes']?.length ?? 0,
@@ -207,8 +263,10 @@ class ShopifyStore with ShopifyError {
   }
 
   /// Returns the Shop.
-  Future<Shop> getShop() async {
+  Future<Shop> getShop(
+      {FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork}) async {
     final WatchQueryOptions _options = WatchQueryOptions(
+      fetchPolicy: fetchPolicy,
       document: gql(getShopQuery),
     );
     final QueryResult result = await _graphQLClient!.query(_options);
@@ -219,12 +277,26 @@ class ShopifyStore with ShopifyError {
   /// Returns a collection by handle.
   @Deprecated('Use [getCollectionById]')
   Future<Collection> getCollectionByHandle(
-    String collectionName,
-  ) async {
+    String collectionName, {
+    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+    String? langCode,
+    String? countryCode,
+  }) async {
     try {
+      Map<String, dynamic> variables = <String, dynamic>{
+        'query': collectionName
+      };
+      if (langCode != null) {
+        variables['langCode'] = langCode;
+      }
+      if (countryCode != null) {
+        variables['countryCode'] = countryCode;
+      }
       final WatchQueryOptions _options = WatchQueryOptions(
-          document: gql(getFeaturedCollectionQuery),
-          variables: {'query': collectionName});
+        fetchPolicy: fetchPolicy,
+        document: gql(getFeaturedCollectionQuery),
+        variables: variables,
+      );
       final QueryResult result = await _graphQLClient!.query(_options);
       checkForError(result);
       return Collections.fromGraphJson(result.data!['collections'])
@@ -236,13 +308,27 @@ class ShopifyStore with ShopifyError {
   }
 
   /// Returns a collection by id.
-  Future<Collection?> getCollectionById(String collectionId) async {
+  Future<Collection?> getCollectionById(
+    String collectionId, {
+    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+    String? langCode,
+    String? countryCode,
+  }) async {
     try {
+      Map<String, dynamic> variables = <String, dynamic>{
+        'ids': [collectionId],
+      };
+      if (langCode != null) {
+        variables['langCode'] = langCode;
+      }
+      if (countryCode != null) {
+        variables['countryCode'] = countryCode;
+      }
       final WatchQueryOptions _options = WatchQueryOptions(
-          document: gql(getCollectionsByIdsQuery),
-          variables: {
-            'ids': [collectionId],
-          });
+        fetchPolicy: fetchPolicy,
+        document: gql(getCollectionsByIdsQuery),
+        variables: variables,
+      );
       final QueryResult result = await _graphQLClient!.query(_options);
       checkForError(result);
       return Collection.fromGraphJson(result.data!);
@@ -255,12 +341,12 @@ class ShopifyStore with ShopifyError {
   /// Returns all available collections.
   ///
   /// Tip: When editing Collections you can choose on which channel or app you want to make them available.
-  Future<List<Collection>> getAllCollections({
-    SortKeyCollection sortKeyCollection = SortKeyCollection.UPDATED_AT,
-    bool reverse = false,
-    String? langCode,
-    String? countryCode,
-  }) async {
+  Future<List<Collection>> getAllCollections(
+      {SortKeyCollection sortKeyCollection = SortKeyCollection.UPDATED_AT,
+      bool reverse = false,
+      String? langCode,
+      String? countryCode,
+      FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork}) async {
     List<Collection> collectionList = [];
     Collections tempCollection;
     String? cursor;
@@ -278,6 +364,7 @@ class ShopifyStore with ShopifyError {
         variables['countryCode'] = countryCode;
       }
       _options = WatchQueryOptions(
+        fetchPolicy: fetchPolicy,
         document: gql(getAllCollectionsOptimizedQuery),
         variables: variables,
       );
@@ -301,20 +388,32 @@ class ShopifyStore with ShopifyError {
         SortKeyProductCollection.CREATED,
     SortKeyCollection sortKeyCollection = SortKeyCollection.UPDATED_AT,
     bool reverse = false,
+    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+    String? langCode,
+    String? countryCode,
   }) async {
     List<Collection>? collectionList;
     String? cursor;
     WatchQueryOptions _options;
+    Map<String, dynamic> variables = <String, dynamic>{
+      'cursor': cursor,
+      'sortKey': sortKeyCollection.parseToString(),
+      'reverse': reverse,
+      'sortKeyProduct': sortKeyProductCollection.parseToString(),
+      'x': x,
+      'n': n
+    };
+    if (langCode != null) {
+      variables['langCode'] = langCode;
+    }
+    if (countryCode != null) {
+      variables['countryCode'] = countryCode;
+    }
     _options = WatchQueryOptions(
-        document: gql(getXCollectionsAndNProductsSortedQuery),
-        variables: {
-          'cursor': cursor,
-          'sortKey': sortKeyCollection.parseToString(),
-          'reverse': reverse,
-          'sortKeyProduct': sortKeyProductCollection.parseToString(),
-          'x': x,
-          'n': n
-        });
+      fetchPolicy: fetchPolicy,
+      document: gql(getXCollectionsAndNProductsSortedQuery),
+      variables: variables,
+    );
     final QueryResult result = await _graphQLClient!.query(_options);
     checkForError(result);
     collectionList = (Collections.fromGraphJson(
@@ -326,21 +425,35 @@ class ShopifyStore with ShopifyError {
   /// Returns a List of [Product].
   ///
   /// Returns all Products from the [Collection] with the [id].
-  Future<List<Product>> getAllProductsFromCollectionById(String id,
-      {SortKeyProductCollection sortKeyProductCollection =
-          SortKeyProductCollection.CREATED}) async {
+  Future<List<Product>> getAllProductsFromCollectionById(
+    String id, {
+    SortKeyProductCollection sortKeyProductCollection =
+        SortKeyProductCollection.CREATED,
+    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+    String? langCode,
+    String? countryCode,
+  }) async {
     String? cursor;
     List<Product> productList = [];
     Collection collection;
     QueryOptions _options;
     do {
+      Map<String, dynamic> variables = <String, dynamic>{
+        'id': id,
+        'cursor': cursor,
+        'sortKey': sortKeyProductCollection.parseToString()
+      };
+      if (langCode != null) {
+        variables['langCode'] = langCode;
+      }
+      if (countryCode != null) {
+        variables['countryCode'] = countryCode;
+      }
       _options = WatchQueryOptions(
-          document: gql(getAllProductsFromCollectionByIdQuery),
-          variables: {
-            'id': id,
-            'cursor': cursor,
-            'sortKey': sortKeyProductCollection.parseToString()
-          });
+        fetchPolicy: fetchPolicy,
+        document: gql(getAllProductsFromCollectionByIdQuery),
+        variables: variables,
+      );
       final QueryResult result = await _graphQLClient!.query(_options);
       checkForError(result);
       productList
@@ -356,20 +469,34 @@ class ShopifyStore with ShopifyError {
   /// Returns the first [limit] Products after the given [startCursor].
   /// [limit] has to be in the range of 0 and 250.
   Future<List<Product>?> getXProductsAfterCursorWithinCollection(
-      String id, int limit,
-      {String? startCursor,
-      SortKeyProductCollection sortKey = SortKeyProductCollection.BEST_SELLING,
-      bool reverse = false}) async {
+    String id,
+    int limit, {
+    String? startCursor,
+    SortKeyProductCollection sortKey = SortKeyProductCollection.BEST_SELLING,
+    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+    bool reverse = false,
+    String? langCode,
+    String? countryCode,
+  }) async {
     String? cursor = startCursor;
+    Map<String, dynamic> variables = <String, dynamic>{
+      'id': id,
+      'cursor': cursor,
+      'limit': limit,
+      'sortKey': sortKey.parseToString(),
+      'reverse': reverse,
+    };
+    if (langCode != null) {
+      variables['langCode'] = langCode;
+    }
+    if (countryCode != null) {
+      variables['countryCode'] = countryCode;
+    }
     final WatchQueryOptions _options = WatchQueryOptions(
-        document: gql(getXProductsAfterCursorWithinCollectionQuery),
-        variables: {
-          'id': id,
-          'cursor': cursor,
-          'limit': limit,
-          'sortKey': sortKey.parseToString(),
-          'reverse': reverse,
-        });
+      fetchPolicy: fetchPolicy,
+      document: gql(getXProductsAfterCursorWithinCollectionQuery),
+      variables: variables,
+    );
     final QueryResult result = await _graphQLClient!.query(_options);
     checkForError(result);
     return (Collection.fromGraphJson(result.data!)).products.productList;
@@ -378,21 +505,37 @@ class ShopifyStore with ShopifyError {
   /// Returns a List of [Product].
   ///
   /// Gets all [Product] from a [query] search sorted by [sortKey].
-  Future<List<Product>> getAllProductsOnQuery(String cursor, String query,
-      {SortKeyProduct? sortKey, bool reverse = false}) async {
+  Future<List<Product>> getAllProductsOnQuery(
+    String cursor,
+    String query, {
+    SortKeyProduct? sortKey,
+    bool reverse = false,
+    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+    String? langCode,
+    String? countryCode,
+  }) async {
     String? cursor;
     List<Product> productList = [];
     Products products;
     WatchQueryOptions _options;
     do {
+      Map<String, dynamic> variables = <String, dynamic>{
+        'cursor': cursor,
+        'sortKey': sortKey?.parseToString(),
+        'query': query,
+        'reverse': reverse
+      };
+      if (langCode != null) {
+        variables['langCode'] = langCode;
+      }
+      if (countryCode != null) {
+        variables['countryCode'] = countryCode;
+      }
       _options = WatchQueryOptions(
-          document: gql(getAllProductsOnQueryQuery),
-          variables: {
-            'cursor': cursor,
-            'sortKey': sortKey?.parseToString(),
-            'query': query,
-            'reverse': reverse
-          });
+        fetchPolicy: fetchPolicy,
+        document: gql(getAllProductsOnQueryQuery),
+        variables: variables,
+      );
       final QueryResult result = await _graphQLClient!.query(_options);
       checkForError(result);
       productList.addAll(
@@ -408,17 +551,32 @@ class ShopifyStore with ShopifyError {
   ///
   /// Gets [limit] amount of [Product] from the [query] search, sorted by [sortKey].
   Future<List<Product>?> getXProductsOnQueryAfterCursor(
-      String query, int limit, String? cursor,
-      {SortKeyProduct? sortKey, bool reverse = false}) async {
+    String query,
+    int limit,
+    String? cursor, {
+    SortKeyProduct? sortKey,
+    bool reverse = false,
+    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+    String? langCode,
+    String? countryCode,
+  }) async {
+    Map<String, dynamic> variables = <String, dynamic>{
+      if (cursor != null) 'cursor': cursor,
+      'limit': limit,
+      'sortKey': sortKey?.parseToString(),
+      'query': query,
+      'reverse': reverse,
+    };
+    if (langCode != null) {
+      variables['langCode'] = langCode;
+    }
+    if (countryCode != null) {
+      variables['countryCode'] = countryCode;
+    }
     final WatchQueryOptions _options = WatchQueryOptions(
+      fetchPolicy: fetchPolicy,
       document: gql(getXProductsOnQueryAfterCursorQuery),
-      variables: {
-        if (cursor != null) 'cursor': cursor,
-        'limit': limit,
-        'sortKey': sortKey?.parseToString(),
-        'query': query,
-        'reverse': reverse,
-      },
+      variables: variables,
     );
     final QueryResult result =
         await ShopifyConfig.graphQLClient!.query(_options);
@@ -431,10 +589,10 @@ class ShopifyStore with ShopifyError {
   ///
   /// Gets [Metafield]s of [Product] optionally filtered by namespace.
   Future<List<Metafield>> getMetafieldsFromProduct(
-    String productHandle,
-    String namespace,
-  ) async {
+      String productHandle, String namespace,
+      {FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork}) async {
     final WatchQueryOptions _options = WatchQueryOptions(
+        fetchPolicy: fetchPolicy,
         document: gql(getMetafieldsFromProductQuery),
         variables: {'handle': productHandle, 'namespace': namespace});
     final QueryResult result =

@@ -56,7 +56,7 @@ class ShopifyConfig {
       ).concat(
         HttpLink('$_storeUrl/api/$_storefrontApiVersion/graphql.json'),
       ),
-      cache: GraphQLCache(),
+      cache: GraphQLCache(store: HiveStore()),
     );
 
     _graphQLClientAdmin = GraphQLClient(
