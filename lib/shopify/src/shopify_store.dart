@@ -594,7 +594,7 @@ class ShopifyStore with ShopifyError {
     try {
       http.Response response = await http.get(
         Uri.parse(
-            "https://${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields.json"),
+            "${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields.json"),
         headers: {
           'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
         },
@@ -619,7 +619,7 @@ class ShopifyStore with ShopifyError {
     try {
       http.Response response = await http.get(
         Uri.parse(
-            "https://${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields/$metaFieldId.json"),
+            "${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields/$metaFieldId.json"),
         headers: {
           'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
         },
@@ -640,7 +640,7 @@ class ShopifyStore with ShopifyError {
     try {
       http.Response response = await http.post(
         Uri.parse(
-            "https://${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields.json"),
+            "${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields.json"),
         body: {
           "metafield": {
             "namespace": namespace,
@@ -674,7 +674,7 @@ class ShopifyStore with ShopifyError {
     try {
       http.Response response = await http.put(
         Uri.parse(
-            "https://${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields/$metaFieldId.json"),
+            "${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields/$metaFieldId.json"),
         body: {
           "metafield": {
             "namespace": namespace,
@@ -703,7 +703,7 @@ class ShopifyStore with ShopifyError {
     try {
       http.Response response = await http.delete(
         Uri.parse(
-            "https://${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields/$metaFieldId.json"),
+            "${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/products/$productId/metafields/$metaFieldId.json"),
         headers: {
           'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
         },

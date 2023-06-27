@@ -20,11 +20,11 @@ Metafield _$MetafieldFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Metafield {
-  String get id => throw _privateConstructorUsedError;
+  int get id => throw _privateConstructorUsedError;
   String get namespace => throw _privateConstructorUsedError;
   String get key => throw _privateConstructorUsedError;
   String get value => throw _privateConstructorUsedError;
-  String get valueType => throw _privateConstructorUsedError;
+  String get type => throw _privateConstructorUsedError;
   String get description => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -39,11 +39,11 @@ abstract class $MetafieldCopyWith<$Res> {
       _$MetafieldCopyWithImpl<$Res, Metafield>;
   @useResult
   $Res call(
-      {String id,
+      {int id,
       String namespace,
       String key,
       String value,
-      String valueType,
+      String type,
       String description});
 }
 
@@ -64,14 +64,14 @@ class _$MetafieldCopyWithImpl<$Res, $Val extends Metafield>
     Object? namespace = null,
     Object? key = null,
     Object? value = null,
-    Object? valueType = null,
+    Object? type = null,
     Object? description = null,
   }) {
     return _then(_value.copyWith(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
+              as int,
       namespace: null == namespace
           ? _value.namespace
           : namespace // ignore: cast_nullable_to_non_nullable
@@ -84,9 +84,9 @@ class _$MetafieldCopyWithImpl<$Res, $Val extends Metafield>
           ? _value.value
           : value // ignore: cast_nullable_to_non_nullable
               as String,
-      valueType: null == valueType
-          ? _value.valueType
-          : valueType // ignore: cast_nullable_to_non_nullable
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
               as String,
       description: null == description
           ? _value.description
@@ -104,11 +104,11 @@ abstract class _$$_MetafieldCopyWith<$Res> implements $MetafieldCopyWith<$Res> {
   @override
   @useResult
   $Res call(
-      {String id,
+      {int id,
       String namespace,
       String key,
       String value,
-      String valueType,
+      String type,
       String description});
 }
 
@@ -127,14 +127,14 @@ class __$$_MetafieldCopyWithImpl<$Res>
     Object? namespace = null,
     Object? key = null,
     Object? value = null,
-    Object? valueType = null,
+    Object? type = null,
     Object? description = null,
   }) {
     return _then(_$_Metafield(
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
+              as int,
       namespace: null == namespace
           ? _value.namespace
           : namespace // ignore: cast_nullable_to_non_nullable
@@ -147,9 +147,9 @@ class __$$_MetafieldCopyWithImpl<$Res>
           ? _value.value
           : value // ignore: cast_nullable_to_non_nullable
               as String,
-      valueType: null == valueType
-          ? _value.valueType
-          : valueType // ignore: cast_nullable_to_non_nullable
+      type: null == type
+          ? _value.type
+          : type // ignore: cast_nullable_to_non_nullable
               as String,
       description: null == description
           ? _value.description
@@ -167,7 +167,7 @@ class _$_Metafield extends _Metafield {
       required this.namespace,
       required this.key,
       required this.value,
-      required this.valueType,
+      required this.type,
       this.description = ''})
       : super._();
 
@@ -175,7 +175,7 @@ class _$_Metafield extends _Metafield {
       _$$_MetafieldFromJson(json);
 
   @override
-  final String id;
+  final int id;
   @override
   final String namespace;
   @override
@@ -183,14 +183,14 @@ class _$_Metafield extends _Metafield {
   @override
   final String value;
   @override
-  final String valueType;
+  final String type;
   @override
   @JsonKey()
   final String description;
 
   @override
   String toString() {
-    return 'Metafield(id: $id, namespace: $namespace, key: $key, value: $value, valueType: $valueType, description: $description)';
+    return 'Metafield(id: $id, namespace: $namespace, key: $key, value: $value, type: $type, description: $description)';
   }
 
   @override
@@ -203,16 +203,15 @@ class _$_Metafield extends _Metafield {
                 other.namespace == namespace) &&
             (identical(other.key, key) || other.key == key) &&
             (identical(other.value, value) || other.value == value) &&
-            (identical(other.valueType, valueType) ||
-                other.valueType == valueType) &&
+            (identical(other.type, type) || other.type == type) &&
             (identical(other.description, description) ||
                 other.description == description));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(
-      runtimeType, id, namespace, key, value, valueType, description);
+  int get hashCode =>
+      Object.hash(runtimeType, id, namespace, key, value, type, description);
 
   @JsonKey(ignore: true)
   @override
@@ -230,11 +229,11 @@ class _$_Metafield extends _Metafield {
 
 abstract class _Metafield extends Metafield {
   factory _Metafield(
-      {required final String id,
+      {required final int id,
       required final String namespace,
       required final String key,
       required final String value,
-      required final String valueType,
+      required final String type,
       final String description}) = _$_Metafield;
   _Metafield._() : super._();
 
@@ -242,7 +241,7 @@ abstract class _Metafield extends Metafield {
       _$_Metafield.fromJson;
 
   @override
-  String get id;
+  int get id;
   @override
   String get namespace;
   @override
@@ -250,7 +249,7 @@ abstract class _Metafield extends Metafield {
   @override
   String get value;
   @override
-  String get valueType;
+  String get type;
   @override
   String get description;
   @override

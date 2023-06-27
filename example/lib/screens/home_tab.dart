@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shopify_flutter/shopify_flutter.dart';
+
 import 'product_detail_screen.dart';
 
 class HomeTab extends StatefulWidget {
@@ -48,6 +49,9 @@ class HomeTabState extends State<HomeTab> {
       final shopifyStore = ShopifyStore.instance;
       final bestSellingProducts = await shopifyStore.getNProducts(6,
           sortKey: SortKeyProduct.BEST_SELLING);
+      shopifyStore.getMetaFieldsFromProduct('8318759928129').then((value) {
+        print(value.length);
+      });
       if (mounted) {
         setState(() {
           products = bestSellingProducts ?? [];
