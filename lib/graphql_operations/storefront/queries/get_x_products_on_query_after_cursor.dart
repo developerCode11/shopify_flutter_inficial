@@ -1,6 +1,6 @@
 /// Query to get x products on query after cursor
 const String getXProductsOnQueryAfterCursorQuery = r'''
-query( $cursor: String, $limit : Int, $sortKey : ProductSortKeys, $query: String, $reverse: Boolean){
+query( $cursor: String, $limit : Int, $sortKey : ProductSortKeys, $query: String, $reverse: Boolean, $langCode: LanguageCode, $countryCode: CountryCode) @inContext(language: $langCode, country: $countryCode) {
   products(query: $query, first: $limit, after: $cursor, sortKey: $sortKey, reverse: $reverse) {
     edges {
       node {

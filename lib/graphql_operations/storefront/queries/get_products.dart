@@ -1,6 +1,6 @@
 /// Query to get products
 const String getProductsQuery = r'''
-query($cursor : String, $metafieldsNamespace : String, $langCode: LanguageCode, $countryCode: CountryCode) @inContext(language: \$langCode, country: \$countryCode)   {
+query($cursor : String, $metafieldsNamespace : String, $langCode: LanguageCode, $countryCode: CountryCode) @inContext(language: $langCode, country: $countryCode)   {
   products(first: 250, after: $cursor) {
     pageInfo {
       hasNextPage
