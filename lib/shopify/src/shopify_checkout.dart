@@ -1,8 +1,9 @@
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:shopify_flutter/enums/src/payment_token_type.dart';
 import 'package:shopify_flutter/enums/src/sort_key_order.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/checkout_complete_free.dart';
-import 'package:shopify_flutter/graphql_operations/storefront/mutations/checkout_line_item_add.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/checkout_complete_with_credit_card_V2.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/mutations/checkout_line_item_add.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/checkout_line_item_remove.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/checkout_line_item_update.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/checkout_line_items_replace.dart';
@@ -20,7 +21,6 @@ import 'package:shopify_flutter/models/src/order/order.dart';
 import 'package:shopify_flutter/models/src/order/orders/orders.dart';
 import 'package:shopify_flutter/models/src/product/price_v_2/price_v_2.dart';
 import 'package:shopify_flutter/models/src/shopify_user/address/address.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../../graphql_operations/storefront/mutations/checkout_associate_customer.dart';
 import '../../graphql_operations/storefront/mutations/checkout_attributes_update.dart';
@@ -287,7 +287,7 @@ class ShopifyCheckout with ShopifyError {
   }
 
   /// Applies [discountCode] to the [Checkout] that [checkoutId] belongs to.
-  Future<void> checkoutDiscountCodeApply(
+  Future<Checkout> checkoutDiscountCodeApply(
     String checkoutId,
     String discountCode,
   ) async {
@@ -300,10 +300,13 @@ class ShopifyCheckout with ShopifyError {
       key: 'checkoutDiscountCodeApplyV2',
       errorKey: 'checkoutUserErrors',
     );
+    return Checkout.fromJson(((result.data!['checkoutDiscountCodeApplyV2'] ??
+            const {})['checkout'] ??
+        const {}));
   }
 
   /// Removes the applied discount from the [Checkout] that [checkoutId] belongs to.
-  Future<void> checkoutDiscountCodeRemove(
+  Future<Checkout> checkoutDiscountCodeRemove(
     String checkoutId,
   ) async {
     final MutationOptions _options = MutationOptions(
@@ -315,6 +318,9 @@ class ShopifyCheckout with ShopifyError {
       key: 'checkoutDiscountCodeRemove',
       errorKey: 'checkoutUserErrors',
     );
+    return Checkout.fromJson(
+        ((result.data!['checkoutDiscountCodeRemove'] ?? const {})['checkout'] ??
+            const {}));
   }
 
   /// Appends the [giftCardCodes] to the [Checkout] that [checkoutId] belongs to.
