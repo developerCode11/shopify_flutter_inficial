@@ -1,9 +1,6 @@
-import 'dart:developer';
-
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:shopify_flutter/mixins/src/shopfiy_error.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shopify_flutter/mixins/src/shopfiy_error.dart';
 
 import '../../graphql_operations/admin/mutations/customer_delete.dart';
 import '../../graphql_operations/storefront/mutations/access_token_delete.dart';
@@ -47,6 +44,7 @@ class ShopifyAuth with ShopifyError {
   Future<ShopifyUser> createUserWithEmailAndPassword({
     String? firstName,
     String? lastName,
+    String? phone,
     required String email,
     required String password,
   }) async {
@@ -57,10 +55,10 @@ class ShopifyAuth with ShopifyError {
         'lastName': lastName,
         'email': email,
         'password': password,
+        'phone': phone,
       },
     );
     final QueryResult result = await _graphQLClient!.mutate(_options);
-    log(result.exception.toString());
     checkForError(
       result,
       key: 'customerCreate',
