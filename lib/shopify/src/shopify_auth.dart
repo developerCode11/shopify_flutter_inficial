@@ -197,9 +197,12 @@ class ShopifyAuth with ShopifyError {
   }
 
   /// Returns the currently signed-in [ShopifyUser] or [null] if there is none.
-  Future<ShopifyUser?> currentUser() async {
+  Future<ShopifyUser?> currentUser({
+    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+  }) async {
     final WatchQueryOptions _getCustomer = WatchQueryOptions(
         document: gql(getCustomerQuery),
+        fetchPolicy: fetchPolicy,
         variables: {'customerAccessToken': await currentCustomerAccessToken});
     if (_shopifyUser.containsKey(ShopifyConfig.storeUrl)) {
       return _shopifyUser[ShopifyConfig.storeUrl];
