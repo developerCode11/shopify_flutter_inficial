@@ -1,10 +1,11 @@
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/customer_address_create.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/customer_address_delete.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/customer_address_update.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/customer_update.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/mutations/customer_update_default_address.dart';
 import 'package:shopify_flutter/mixins/src/shopfiy_error.dart';
 import 'package:shopify_flutter/models/src/shopify_user/address/address.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../../shopify_config.dart';
 
@@ -149,6 +150,23 @@ class ShopifyCustomer with ShopifyError {
     checkForError(
       result,
       key: 'customerAddressDelete',
+      errorKey: 'customerUserErrors',
+    );
+  }
+
+  /// Make the address default associated with the [addressId] to the customer to which [customerId] belongs to.
+  /// A Customer may have more than 1 address, so the addresses have Id's.
+  Future<void> customerMakeAddressDefault({
+    required String customerId,
+    required String addressId,
+  }) async {
+    final MutationOptions _options = MutationOptions(
+        document: gql(customerUpdateDefaultAddress),
+        variables: {'customerId': customerId, 'addressId': addressId});
+    final QueryResult result = await _graphQLClient!.mutate(_options);
+    checkForError(
+      result,
+      key: 'customerUpdateDefaultAddress',
       errorKey: 'customerUserErrors',
     );
   }
