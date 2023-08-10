@@ -157,16 +157,19 @@ class ShopifyCustomer with ShopifyError {
   /// Make the address default associated with the [addressId] to the customer to which [customerId] belongs to.
   /// A Customer may have more than 1 address, so the addresses have Id's.
   Future<void> customerMakeAddressDefault({
-    required String customerId,
+    required String customerAccessToken,
     required String addressId,
   }) async {
     final MutationOptions _options = MutationOptions(
-        document: gql(customerUpdateDefaultAddress),
-        variables: {'customerId': customerId, 'addressId': addressId});
+        document: gql(customerDefaultAddressUpdate),
+        variables: {
+          'customerAccessToken': customerAccessToken,
+          'addressId': addressId
+        });
     final QueryResult result = await _graphQLClient!.mutate(_options);
     checkForError(
       result,
-      key: 'customerUpdateDefaultAddress',
+      key: 'customerDefaultAddressUpdate',
       errorKey: 'customerUserErrors',
     );
   }

@@ -1,7 +1,7 @@
 /// Mutation to update customer's default address
-const String customerUpdateDefaultAddress = r'''
-mutation MyMutation($addressId: ID!, $customerId: ID!) {
-  customerUpdateDefaultAddress(addressId: $addressId, customerId: $customerId) {
+const String customerDefaultAddressUpdate = r'''
+mutation customerDefaultAddressUpdate($addressId: ID!, $customerAccessToken: String!) {
+  customerDefaultAddressUpdate(addressId: $addressId, customerAccessToken: $customerAccessToken) {
     customerUserErrors {
       code
       field
