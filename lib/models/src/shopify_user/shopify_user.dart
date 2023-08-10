@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:shopify_flutter/models/src/shopify_user/address/address.dart';
 
 import 'addresses/addresses.dart';
 import 'last_incomplete_checkout/last_incomplete_checkout.dart';
@@ -17,6 +18,7 @@ class ShopifyUser with _$ShopifyUser {
     String? id,
     String? lastName,
     String? phone,
+    Address? defaultAddress,
     List<String>? tags,
     LastIncompleteCheckout? lastIncompleteCheckout,
   }) = _ShopifyUser;
@@ -36,6 +38,9 @@ class ShopifyUser with _$ShopifyUser {
               .trim(),
       phone: json['phone'],
       tags: _getTagList((json)),
+      defaultAddress: json['defaultAddress'] == null
+          ? null
+          : Address.fromJson(json['defaultAddress'] as Map<String, dynamic>),
       lastIncompleteCheckout: LastIncompleteCheckout.fromJson(
           json['lastIncompleteCheckout'] ?? const {}),
     );
