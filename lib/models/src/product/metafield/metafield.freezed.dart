@@ -20,7 +20,7 @@ Metafield _$MetafieldFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Metafield {
-  int get id => throw _privateConstructorUsedError;
+  String get id => throw _privateConstructorUsedError;
   String get namespace => throw _privateConstructorUsedError;
   String get key => throw _privateConstructorUsedError;
   String get value => throw _privateConstructorUsedError;
@@ -39,7 +39,7 @@ abstract class $MetafieldCopyWith<$Res> {
       _$MetafieldCopyWithImpl<$Res, Metafield>;
   @useResult
   $Res call(
-      {int id,
+      {String id,
       String namespace,
       String key,
       String value,
@@ -71,7 +71,7 @@ class _$MetafieldCopyWithImpl<$Res, $Val extends Metafield>
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as int,
+              as String,
       namespace: null == namespace
           ? _value.namespace
           : namespace // ignore: cast_nullable_to_non_nullable
@@ -104,7 +104,7 @@ abstract class _$$_MetafieldCopyWith<$Res> implements $MetafieldCopyWith<$Res> {
   @override
   @useResult
   $Res call(
-      {int id,
+      {String id,
       String namespace,
       String key,
       String value,
@@ -134,7 +134,7 @@ class __$$_MetafieldCopyWithImpl<$Res>
       id: null == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as int,
+              as String,
       namespace: null == namespace
           ? _value.namespace
           : namespace // ignore: cast_nullable_to_non_nullable
@@ -175,7 +175,7 @@ class _$_Metafield extends _Metafield {
       _$$_MetafieldFromJson(json);
 
   @override
-  final int id;
+  final String id;
   @override
   final String namespace;
   @override
@@ -229,7 +229,7 @@ class _$_Metafield extends _Metafield {
 
 abstract class _Metafield extends Metafield {
   factory _Metafield(
-      {required final int id,
+      {required final String id,
       required final String namespace,
       required final String key,
       required final String value,
@@ -241,7 +241,7 @@ abstract class _Metafield extends Metafield {
       _$_Metafield.fromJson;
 
   @override
-  int get id;
+  String get id;
   @override
   String get namespace;
   @override

@@ -8,7 +8,7 @@ class Metafield with _$Metafield {
   const Metafield._();
 
   factory Metafield({
-    required int id,
+    required String id,
     required String namespace,
     required String key,
     required String value,
@@ -18,7 +18,7 @@ class Metafield with _$Metafield {
 
   static Metafield fromGraphJson(Map<String, dynamic> json) {
     return Metafield(
-        id: json['id'] ?? 0,
+        id: json['id'].toString() ?? "0",
         namespace: json['namespace'] ?? '',
         key: json['key'] ?? '',
         value: json['value'] ?? '',

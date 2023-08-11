@@ -7,7 +7,7 @@ part of 'metafield.dart';
 // **************************************************************************
 
 _$_Metafield _$$_MetafieldFromJson(Map<String, dynamic> json) => _$_Metafield(
-      id: json['id'] as int,
+      id: json['id'] as String,
       namespace: json['namespace'] as String,
       key: json['key'] as String,
       value: json['value'] as String,
