@@ -842,7 +842,7 @@ class ShopifyStore with ShopifyError {
       Uri.parse(
         "https://judge.me/api/v1/reviews?shop_domain=${ShopifyConfig.storeUrl?.replaceAll('https://', '')}&api_token=$apiToken",
       ),
-      body: body,
+      body: jsonEncode(body),
       headers: {
         'Content-Type': 'application/json',
       },
