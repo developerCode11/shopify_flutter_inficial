@@ -769,7 +769,7 @@ class ShopifyStore with ShopifyError {
         'productId': productId,
       },
     );
-    final QueryResult result = await _graphQLClient!.mutate(_options);
+    final QueryResult result = await _graphQLClientAdmin!.mutate(_options);
     checkForError(
       result,
       key: 'productCreateMedia',
