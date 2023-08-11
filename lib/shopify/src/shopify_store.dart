@@ -830,7 +830,7 @@ class ShopifyStore with ShopifyError {
     final body = {
       "shop_domain": ShopifyConfig.storeUrl?.replaceAll('https://', ''),
       "platform": "shopify",
-      "id": 8318751768897,
+      "id": productId,
       "email": email,
       "name": name,
       "rating": rating,
