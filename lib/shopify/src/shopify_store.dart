@@ -792,6 +792,7 @@ class ShopifyStore with ShopifyError {
     request.fields.addAll(params);
     final responseStream = await request.send();
     final response = await http.Response.fromStream(responseStream);
+    log(response.body);
   }
 
   Future<ReviewListModel> getProductReview(
