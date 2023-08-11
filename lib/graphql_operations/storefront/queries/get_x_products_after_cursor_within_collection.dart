@@ -18,6 +18,18 @@ query($id : ID!, $cursor : String, $limit : Int, $sortKey : ProductCollectionSor
         edges {
           cursor
           node {
+          metafields(first: 250) {
+              edges {
+                  node {
+                      id
+                      namespace
+                      key
+                      value
+                      type
+                      description
+                  }
+              }
+          }          
           options(first: 50) {
             id
             name
