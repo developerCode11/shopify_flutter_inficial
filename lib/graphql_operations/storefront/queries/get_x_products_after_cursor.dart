@@ -8,6 +8,18 @@ query($cursor : String, $x : Int, $reverse: Boolean, $sortKey: ProductSortKeys, 
     edges {
       cursor
       node {
+      metafields(identifiers: [ 
+      {namespace: "reviews", key: "rating"}, 
+      {namespace: "reviews", key: "rating_count"}, 
+      ]) 
+               {
+                  id
+                  namespace
+                  key
+                  value
+                  type
+                  description
+              }      
       options(first: 50) {
             id
             name

@@ -1,8 +1,11 @@
+import 'dart:convert';
+import 'dart:developer';
+
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:shopify_flutter/models/src/product/metafield/metafield.dart';
 import 'package:shopify_flutter/models/src/product/option/option.dart';
 import 'package:shopify_flutter/models/src/product/product_variant/product_variant.dart';
 import 'package:shopify_flutter/models/src/product/shopify_image/shopify_image.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'associated_collections/associated_collections.dart';
 
@@ -145,10 +148,14 @@ class Product with _$Product {
     return imageList;
   }
 
-  static _getMetafieldList(Map<String, dynamic> json) {
+  static _getMetafieldList(List json) {
     List<Metafield> metafieldList = [];
-    json['edges']?.forEach((metafield) =>
-        metafieldList.add(Metafield.fromGraphJson(metafield ?? const {})));
+
+    json.forEach((metafield) {
+      if (metafield != null) {
+        metafieldList.add(Metafield.fromGraphJson(metafield ?? const {}));
+      }
+    });
     return metafieldList;
   }
 }

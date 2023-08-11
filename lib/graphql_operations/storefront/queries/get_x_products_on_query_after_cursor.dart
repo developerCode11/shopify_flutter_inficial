@@ -4,6 +4,18 @@ query( $cursor: String, $limit : Int, $sortKey : ProductSortKeys, $query: String
   products(query: $query, first: $limit, after: $cursor, sortKey: $sortKey, reverse: $reverse) {
     edges {
       node {
+      metafields(identifiers: [ 
+      {namespace: "reviews", key: "rating"}, 
+      {namespace: "reviews", key: "rating_count"}, 
+      ]) 
+               {
+                  id
+                  namespace
+                  key
+                  value
+                  type
+                  description
+              }      
       options(first: 50) {
             id
             name

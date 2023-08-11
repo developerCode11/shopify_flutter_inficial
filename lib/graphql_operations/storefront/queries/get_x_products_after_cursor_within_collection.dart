@@ -18,9 +18,11 @@ query($id : ID!, $cursor : String, $limit : Int, $sortKey : ProductCollectionSor
         edges {
           cursor
           node {
-          metafields(first: 250) {
-              edges {
-                  node {
+          metafields(identifiers: [ 
+          {namespace: "reviews", key: "rating"}, 
+          {namespace: "reviews", key: "rating_count"}, 
+          ]) 
+                   {
                       id
                       namespace
                       key
@@ -28,8 +30,6 @@ query($id : ID!, $cursor : String, $limit : Int, $sortKey : ProductCollectionSor
                       type
                       description
                   }
-              }
-          }          
           options(first: 50) {
             id
             name

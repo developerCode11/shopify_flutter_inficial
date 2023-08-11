@@ -13,18 +13,18 @@ query($cursor : String, $metafieldsNamespace : String, $langCode: LanguageCode, 
           name
           values
         }
-        metafields(namespace: $metafieldsNamespace, first: 250) {
-          edges {
-            node {
-              id
-              namespace
-              key
-              value
-              valueType
-              description
-            }
-          }
-        }
+      metafields(identifiers: [ 
+      {namespace: "reviews", key: "rating"}, 
+      {namespace: "reviews", key: "rating_count"}, 
+      ]) 
+               {
+                  id
+                  namespace
+                  key
+                  value
+                  type
+                  description
+              }
         variants(first: 250) {
           edges {
             node {

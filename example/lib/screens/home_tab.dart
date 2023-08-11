@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:shopify_flutter/shopify_flutter.dart';
 
@@ -45,21 +47,19 @@ class HomeTabState extends State<HomeTab> {
   }
 
   Future<void> _fetchProducts() async {
-    try {
-      final shopifyStore = ShopifyStore.instance;
-      final bestSellingProducts = await shopifyStore.getNProducts(6,
-          sortKey: SortKeyProduct.BEST_SELLING);
-      shopifyStore.getMetaFieldsFromProduct('8318759928129').then((value) {
-        print(value.length);
+    final shopifyStore = ShopifyStore.instance;
+    final bestSellingProducts = await shopifyStore.getProductsByIds(
+      ['gid://shopify/Product/8318751768897'],
+    );
+    print(jsonDecode(bestSellingProducts?.first.metafields.first.value ?? ''));
+    shopifyStore.getMetaFieldsFromProduct('8318759928129').then((value) {
+      print(value.length);
+    });
+    if (mounted) {
+      setState(() {
+        products = bestSellingProducts ?? [];
+        _isLoading = false;
       });
-      if (mounted) {
-        setState(() {
-          products = bestSellingProducts ?? [];
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      debugPrint(e.toString());
     }
   }
 

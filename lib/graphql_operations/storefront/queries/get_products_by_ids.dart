@@ -3,6 +3,17 @@ const String getProductsByIdsQuery = r'''
 query($ids : [ID!]!, $langCode: LanguageCode, $countryCode: CountryCode) @inContext(language: $langCode, country: $countryCode) {
   nodes(ids: $ids) {
     ... on Product {
+              metafields(identifiers: [ 
+          {namespace: "reviews", key: "rating"}, 
+          {namespace: "reviews", key: "rating_count"}, 
+          ]) 
+                   {
+                      namespace
+                      key
+                      value
+                      type
+                      description
+                  }
     options(first: 50) {
             id
             name

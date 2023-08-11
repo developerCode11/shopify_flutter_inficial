@@ -8,6 +8,18 @@ query getProductRecommentationsQuery($id: ID!, $langCode: LanguageCode, $country
     descriptionHtml
     handle
     id
+      metafields(identifiers: [ 
+      {namespace: "reviews", key: "rating"}, 
+      {namespace: "reviews", key: "rating_count"}, 
+      ]) 
+               {
+                  id
+                  namespace
+                  key
+                  value
+                  type
+                  description
+              }    
     images(first: 250) {
       edges {
         node {

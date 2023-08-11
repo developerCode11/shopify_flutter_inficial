@@ -18,12 +18,12 @@ class Metafield with _$Metafield {
 
   static Metafield fromGraphJson(Map<String, dynamic> json) {
     return Metafield(
-        id: (json['node'] ?? const {})['id'],
-        namespace: (json['node'] ?? const {})['namespace'],
-        key: (json['node'] ?? const {})['key'],
-        value: (json['node'] ?? const {})['value'],
-        type: (json['node'] ?? const {})['type'],
-        description: (json['node'] ?? const {})['description']);
+        id: json['id'] ?? 0,
+        namespace: json['namespace'] ?? '',
+        key: json['key'] ?? '',
+        value: json['value'] ?? '',
+        type: json['type'] ?? '',
+        description: json['description'] ?? '');
   }
 
   factory Metafield.fromJson(Map<String, dynamic> json) =>
