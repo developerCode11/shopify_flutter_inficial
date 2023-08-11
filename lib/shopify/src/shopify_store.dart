@@ -826,7 +826,7 @@ class ShopifyStore with ShopifyError {
     required String reviewBody,
     required String email,
     required String name,
-    required double rating,
+    required String rating,
   }) async {
     final body = {
       "shop_domain": ShopifyConfig.storeUrl?.replaceAll('https://', ''),
