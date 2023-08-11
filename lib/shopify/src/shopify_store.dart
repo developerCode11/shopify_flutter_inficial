@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shopify_flutter/enums/enums.dart';
 import 'package:shopify_flutter/enums/src/sort_key_collection.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/mutations/product_create_media.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/mutations/staged_upload_create.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_collections_optimized.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_products_from_collection_by_id.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_products_on_query.dart';
@@ -21,6 +24,10 @@ import 'package:shopify_flutter/models/src/collection/collections/collections.da
 import 'package:shopify_flutter/models/src/product/metafield/metafield.dart';
 import 'package:shopify_flutter/models/src/product/product.dart';
 import 'package:shopify_flutter/models/src/product/products/products.dart';
+import 'package:shopify_flutter/models/src/product/reviews/review_list_model.dart';
+import 'package:shopify_flutter/models/src/product/stage_uploads/media.dart';
+import 'package:shopify_flutter/models/src/product/stage_uploads/stage_upload.dart';
+import 'package:shopify_flutter/models/src/product/stage_uploads/stage_uploads_input.dart';
 import 'package:shopify_flutter/models/src/shop/shop.dart';
 
 import '../../graphql_operations/storefront/queries/get_featured_collections.dart';
@@ -606,7 +613,6 @@ class ShopifyStore with ShopifyError {
             .toList();
       }
     } catch (e) {
-      log(e.toString());
       return [];
     }
     return metafields;
@@ -629,7 +635,6 @@ class ShopifyStore with ShopifyError {
         return Metafield.fromJson(data['metafield']);
       }
     } catch (e) {
-      log(e.toString());
       return null;
     }
     return null;
@@ -658,7 +663,6 @@ class ShopifyStore with ShopifyError {
         return Metafield.fromJson(data['metafield']);
       }
     } catch (e) {
-      log(e.toString());
       return null;
     }
     return null;
@@ -692,7 +696,6 @@ class ShopifyStore with ShopifyError {
         return Metafield.fromJson(data['metafield']);
       }
     } catch (e) {
-      log(e.toString());
       return null;
     }
     return null;
@@ -713,6 +716,192 @@ class ShopifyStore with ShopifyError {
       }
     } catch (e) {
       return false;
+    }
+    return false;
+  }
+
+  Future<StagedUpload> stagedUploadCreate({
+    required InputList input,
+    required String productId,
+  }) async {
+    final MutationOptions _options = MutationOptions(
+      document: gql(stagedUploadsCreate),
+      variables: input.toJson(),
+    );
+    final QueryResult result = await _graphQLClient!.mutate(_options);
+    checkForError(
+      result,
+      key: 'stagedUploadsCreate',
+      errorKey: 'userErrors',
+    );
+    StagedUpload stagedUpload = StagedUpload.fromJson(result.data ?? {});
+    // await Future.forEach(stagedUpload.stagedUploadsCreate?.stagedTargets ?? <StagedTargets>[], (StagedTargets stagedTarget) async {
+    //  });
+    List<Media> medias = [];
+    for (int i = 0;
+        i < (stagedUpload.stagedUploadsCreate?.stagedTargets?.length ?? 0);
+        i++) {
+      uploadMediaToTheShopifyStore(
+          stagedTargets: stagedUpload.stagedUploadsCreate?.stagedTargets?[i],
+          file: File(input.input?[i].filepath ?? ''));
+
+      medias.add(Media(
+        originalSource:
+            stagedUpload.stagedUploadsCreate?.stagedTargets?[i].resourceUrl,
+        alt: input.input?[i].resource,
+        mediaContentType: input.input?[i].resource,
+      ));
+    }
+    await Future.delayed(const Duration(milliseconds: 200));
+    await assignMediaToTheProduct(input: medias, productId: productId);
+    return stagedUpload;
+  }
+
+  Future<void> assignMediaToTheProduct({
+    required List<Media> input,
+    required String productId,
+  }) async {
+    final MutationOptions _options = MutationOptions(
+      document: gql(productCreateMedia),
+      variables: {
+        'media': input.map((e) => e.toJson()).toList(),
+        'productId': productId,
+      },
+    );
+    final QueryResult result = await _graphQLClient!.mutate(_options);
+    checkForError(
+      result,
+      key: 'productCreateMedia',
+      errorKey: 'mediaUserErrors',
+    );
+  }
+
+  Future<void> uploadMediaToTheShopifyStore(
+      {required StagedTargets? stagedTargets, required File file}) async {
+    Map<String, String> params = {};
+    stagedTargets?.parameters?.forEach((element) {
+      params['${element.name}'] = element.value.toString();
+    });
+    final multipartFile = http.MultipartFile.fromBytes(
+        'file', file.readAsBytesSync(),
+        filename: file.path.split('/').last);
+    final request =
+        http.MultipartRequest('POST', Uri.parse('${stagedTargets?.url}'))
+          ..files.add(multipartFile);
+    request.fields.addAll(params);
+    final responseStream = await request.send();
+    final response = await http.Response.fromStream(responseStream);
+  }
+
+  Future<ReviewListModel> getProductReview(
+      {required String apiToken, required String productId}) async {
+    try {
+      http.Response response1 = await http.get(
+        Uri.parse(
+            "https://judge.me/api/v1/products/-1?external_id=$productId&shop_domain=${ShopifyConfig.storeUrl?.replaceAll('https://', '')}&api_token=$apiToken"),
+      );
+      if (response1.statusCode == 200) {
+        final data = jsonDecode(response1.body);
+        http.Response response = await http.get(
+          Uri.parse(
+              "https://judge.me/api/v1/reviews?shop_domain=${ShopifyConfig.storeUrl?.replaceAll('https://', '')}&api_token=$apiToken&product_id=${data['product']['id']}&published=true&current_page=1&per_page=100"),
+        );
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          return ReviewListModel.fromJson(data);
+        }
+      }
+    } catch (e) {
+      return ReviewListModel(reviews: []);
+    }
+    return ReviewListModel(reviews: []);
+  }
+
+  Future<bool> createProductReview({
+    required String apiToken,
+    required String productId,
+    required List<String> images,
+    required String reviewBody,
+    required String email,
+    required String name,
+    required double rating,
+  }) async {
+    final body = {
+      "shop_domain": ShopifyConfig.storeUrl?.replaceAll('https://', ''),
+      "platform": "shopify",
+      "id": 8318751768897,
+      "email": email,
+      "name": name,
+      "rating": rating,
+      "body": reviewBody,
+      "picture_urls": images
+    };
+    http.Response response = await http.post(
+      Uri.parse(
+        "https://judge.me/api/v1/reviews?shop_domain=${ShopifyConfig.storeUrl?.replaceAll('https://', '')}&api_token=$apiToken",
+      ),
+      body: body,
+    );
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      return true;
+    }
+    return false;
+  }
+
+  Future<Map<String, dynamic>> getCountOfReview({
+    required String apiToken,
+    required String productId,
+  }) async {
+    Map<String, dynamic> countData = {};
+    List ratings = [1, 2, 3, 4, 5];
+
+    http.Response response1 = await http.get(
+      Uri.parse(
+          "https://judge.me/api/v1/products/-1?external_id=$productId&shop_domain=${ShopifyConfig.storeUrl?.replaceAll('https://', '')}&api_token=$apiToken"),
+    );
+    if (response1.statusCode == 200) {
+      final data = jsonDecode(response1.body);
+      await Future.forEach(ratings, (element) async {
+        countData["$element"] = await getCountOfRating(
+            apiToken: apiToken,
+            productId: data['product']['id'],
+            rating: element);
+      });
+      return countData;
+    }
+    return {};
+  }
+
+  Future<String> getCountOfRating({
+    required String apiToken,
+    required String productId,
+    required int rating,
+  }) async {
+    http.Response response = await http.get(
+      Uri.parse(
+          "https://judge.me/api/v1/reviews/count?&shop_domain=${ShopifyConfig.storeUrl?.replaceAll('https://', '')}&api_token=$apiToken&product_id=$productId&rating=$rating"),
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['count'].toString();
+    }
+
+    return '0';
+  }
+
+  Future<bool> deleteReview({
+    required String apiToken,
+    required String reviewId,
+  }) async {
+    http.Response response = await http.put(
+      Uri.parse(
+          "https://judge.me/api/v1/reviews/$reviewId?shop_domain=${ShopifyConfig.storeUrl?.replaceAll('https://', '')}&api_token=$apiToken"),
+      body: {
+        "curated": "spam",
+      },
+    );
+    if (response.statusCode == 200) {
+      return true;
     }
     return false;
   }
