@@ -724,17 +724,22 @@ class ShopifyStore with ShopifyError {
     required InputList input,
     required String productId,
   }) async {
-    final MutationOptions _options = MutationOptions(
-      document: gql(stagedUploadsCreate),
-      variables: input.toJson(),
-    );
-    final QueryResult result = await _graphQLClient!.mutate(_options);
-    checkForError(
-      result,
-      key: 'stagedUploadsCreate',
-      errorKey: 'userErrors',
-    );
-    StagedUpload stagedUpload = StagedUpload.fromJson(result.data ?? {});
+    http.Response response = await http.post(
+        Uri.parse(
+            "${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/graphql.json"),
+        headers: {
+          'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
+        },
+        body: {
+          'query': stagedUploadsCreate,
+          'variables': input.toJson(),
+        });
+    if (response.statusCode != 200) {
+      throw ShopifyException('stagedUploadsCreate', 'stagedUploadsCreate');
+    }
+
+    StagedUpload stagedUpload =
+        StagedUpload.fromJson(jsonDecode(response.body)['data']);
     // await Future.forEach(stagedUpload.stagedUploadsCreate?.stagedTargets ?? <StagedTargets>[], (StagedTargets stagedTarget) async {
     //  });
     List<Media> medias = [];
