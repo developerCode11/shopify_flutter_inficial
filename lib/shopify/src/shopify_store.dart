@@ -884,7 +884,7 @@ class ShopifyStore with ShopifyError {
   }) async {
     http.Response response = await http.get(
       Uri.parse(
-          "https://judge.me/api/v1/reviews/count?&shop_domain=${ShopifyConfig.storeUrl?.replaceAll('https://', '')}&api_token=$apiToken&product_id=$productId&rating=$rating"),
+          "https://judge.me/api/v1/reviews/count?&shop_domain=${ShopifyConfig.storeUrl?.replaceAll('https://', '')}&api_token=$apiToken&product_id=$productId&rating=$rating&published=true"),
     );
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
