@@ -867,9 +867,10 @@ class ShopifyStore with ShopifyError {
       final data = jsonDecode(response1.body);
       await Future.forEach(ratings, (element) async {
         countData["$element"] = await getCountOfRating(
-            apiToken: apiToken,
-            productId: data['product']['id'],
-            rating: element);
+          apiToken: apiToken,
+          productId: data['product']['id'].toString(),
+          rating: element,
+        );
       });
       return countData;
     }

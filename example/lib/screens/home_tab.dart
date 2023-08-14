@@ -47,11 +47,11 @@ class HomeTabState extends State<HomeTab> {
   Future<void> _fetchProducts() async {
     final shopifyStore = ShopifyStore.instance;
 
-    final review = await shopifyStore.getProductReview(
+    final review = await shopifyStore.getCountOfReview(
       apiToken: 'GGXjQo-bjg_t38OdAHbQ3oDbAPQ',
       productId: '8318751768897',
     );
-    print(review.toJson());
+    print(review);
 
     final bestSellingProducts = await shopifyStore.getNProducts(6,
         sortKey: SortKeyProduct.BEST_SELLING);
