@@ -742,7 +742,6 @@ class ShopifyStore with ShopifyError {
       int index = stagedUpload.stagedUploadsCreate?.stagedTargets
               ?.indexWhere((element) => element.url == stagedTarget.url) ??
           -1;
-      print(stagedTarget.resourceUrl);
       await uploadMediaToTheShopifyStore(
           stagedTargets: stagedTarget,
           file: File(input.input?[index].filepath ?? ''));
