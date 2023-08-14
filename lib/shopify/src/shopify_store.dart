@@ -736,25 +736,33 @@ class ShopifyStore with ShopifyError {
       errorKey: 'userErrors',
     );
     StagedUpload stagedUpload = StagedUpload.fromJson(result.data ?? {});
-    // await Future.forEach(stagedUpload.stagedUploadsCreate?.stagedTargets ?? <StagedTargets>[], (StagedTargets stagedTarget) async {
-    //  });
-    List<Media> medias = [];
-    for (int i = 0;
-        i < (stagedUpload.stagedUploadsCreate?.stagedTargets?.length ?? 0);
-        i++) {
-      uploadMediaToTheShopifyStore(
-          stagedTargets: stagedUpload.stagedUploadsCreate?.stagedTargets?[i],
-          file: File(input.input?[i].filepath ?? ''));
+    await Future.forEach(
+        stagedUpload.stagedUploadsCreate?.stagedTargets ?? <StagedTargets>[],
+        (StagedTargets stagedTarget) async {
+      int index = stagedUpload.stagedUploadsCreate?.stagedTargets
+              ?.indexWhere((element) => element.url == stagedTarget.url) ??
+          -1;
+      await uploadMediaToTheShopifyStore(
+          stagedTargets: stagedTarget,
+          file: File(input.input?[index].filepath ?? ''));
+    });
+    // List<Media> medias = [];
+    // for (int i = 0;
+    //     i < (stagedUpload.stagedUploadsCreate?.stagedTargets?.length ?? 0);
+    //     i++) {
+    //   uploadMediaToTheShopifyStore(
+    //       stagedTargets: stagedUpload.stagedUploadsCreate?.stagedTargets?[i],
+    //       file: File(input.input?[i].filepath ?? ''));
 
-      medias.add(Media(
-        originalSource:
-            stagedUpload.stagedUploadsCreate?.stagedTargets?[i].resourceUrl,
-        alt: input.input?[i].resource,
-        mediaContentType: input.input?[i].resource,
-      ));
-    }
-    await Future.delayed(const Duration(milliseconds: 200));
-    await assignMediaToTheProduct(input: medias, productId: productId);
+    // medias.add(Media(
+    //   originalSource:
+    //       stagedUpload.stagedUploadsCreate?.stagedTargets?[i].resourceUrl,
+    //   alt: input.input?[i].resource,
+    //   mediaContentType: input.input?[i].resource,
+    // ));
+    // }
+    // await Future.delayed(const Duration(milliseconds: 200));
+    // await assignMediaToTheProduct(input: medias, productId: productId);
     return stagedUpload;
   }
 
