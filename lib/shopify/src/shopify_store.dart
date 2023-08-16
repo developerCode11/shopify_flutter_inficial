@@ -515,7 +515,6 @@ class ShopifyStore with ShopifyError {
   ///
   /// Gets all [Product] from a [query] search sorted by [sortKey].
   Future<List<Product>> getAllProductsOnQuery(
-    String cursor,
     String query, {
     SortKeyProduct? sortKey,
     bool reverse = false,
