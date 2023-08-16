@@ -66,14 +66,16 @@ class Input {
     if (buyerIdentity != null) {
       data['buyerIdentity'] = buyerIdentity!.toJson();
     }
-    data['discountCodes'] = discountCodes;
-    if (lines != null) {
-      data['lines'] = lines!.map((v) => v.toJson()).toList();
+    if (discountCodes != null) {
+      data['discountCodes'] = discountCodes;
     }
+    data['lines'] = lines.map((v) => v.toJson()).toList();
     if (metafields != null) {
       data['metafields'] = metafields!.map((v) => v.toJson()).toList();
     }
-    data['note'] = note;
+    if (note != null) {
+      data['note'] = note;
+    }
     return data;
   }
 }
@@ -114,8 +116,12 @@ class BuyerIdentity {
       this.walletPreferences});
 
   BuyerIdentity.fromJson(Map<String, dynamic> json) {
-    countryCode = json['countryCode'];
-    customerAccessToken = json['customerAccessToken'];
+    if (countryCode != null) {
+      countryCode = json['countryCode'];
+    }
+    if (customerAccessToken != null) {
+      customerAccessToken = json['customerAccessToken'];
+    }
     if (json['deliveryAddressPreferences'] != null) {
       deliveryAddressPreferences = <DeliveryAddressPreferences>[];
       json['deliveryAddressPreferences'].forEach((v) {
@@ -124,20 +130,28 @@ class BuyerIdentity {
     }
     email = json['email'];
     phone = json['phone'];
-    walletPreferences = json['walletPreferences'].cast<String>();
+    if (walletPreferences != null) {
+      walletPreferences = json['walletPreferences'].cast<String>();
+    }
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['countryCode'] = countryCode;
-    data['customerAccessToken'] = customerAccessToken;
+    if (countryCode != null) {
+      data['countryCode'] = countryCode;
+    }
+    if (customerAccessToken != null) {
+      data['customerAccessToken'] = customerAccessToken;
+    }
     if (deliveryAddressPreferences != null) {
       data['deliveryAddressPreferences'] =
-          deliveryAddressPreferences!.map((v) => v.toJson()).toList();
+          deliveryAddressPreferences!.first.toJson();
     }
     data['email'] = email;
     data['phone'] = phone;
-    data['walletPreferences'] = walletPreferences;
+    if (walletPreferences != null) {
+      data['walletPreferences'] = walletPreferences;
+    }
     return data;
   }
 }
@@ -157,7 +171,9 @@ class DeliveryAddressPreferences {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['customerAddressId'] = customerAddressId;
+    if (customerAddressId != null) {
+      data['customerAddressId'] = customerAddressId;
+    }
     if (deliveryAddress != null) {
       data['deliveryAddress'] = deliveryAddress!.toJson();
     }
@@ -236,7 +252,9 @@ class Lines {
     }
     merchandiseId = json['merchandiseId'];
     quantity = json['quantity'];
-    sellingPlanId = json['sellingPlanId'];
+    if (sellingPlanId != null) {
+      sellingPlanId = json['sellingPlanId'];
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -246,7 +264,9 @@ class Lines {
     }
     data['merchandiseId'] = merchandiseId;
     data['quantity'] = quantity;
-    data['sellingPlanId'] = sellingPlanId;
+    if (sellingPlanId != null) {
+      data['sellingPlanId'] = sellingPlanId;
+    }
     return data;
   }
 }

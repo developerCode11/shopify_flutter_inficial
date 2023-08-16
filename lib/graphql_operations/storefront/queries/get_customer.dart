@@ -51,6 +51,17 @@ query($customerAccessToken : String!){
     id
     lastName
     phone
+    metafields(identifiers: [
+      {namespace: "cart", key: "cartId"},
+      ])
+        {
+          id
+          namespace
+          key
+          value
+          type
+          description
+        }    
     lastIncompleteCheckout {
         completedAt
         createdAt

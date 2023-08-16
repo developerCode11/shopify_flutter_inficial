@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:shopify_flutter/models/src/product/metafield/metafield.dart';
 import 'package:shopify_flutter/models/src/shopify_user/address/address.dart';
 
 import 'addresses/addresses.dart';
@@ -20,6 +21,7 @@ class ShopifyUser with _$ShopifyUser {
     String? phone,
     Address? defaultAddress,
     List<String>? tags,
+    List<Metafield>? metafields,
     LastIncompleteCheckout? lastIncompleteCheckout,
   }) = _ShopifyUser;
 
@@ -43,7 +45,19 @@ class ShopifyUser with _$ShopifyUser {
           : Address.fromJson(json['defaultAddress'] as Map<String, dynamic>),
       lastIncompleteCheckout: LastIncompleteCheckout.fromJson(
           json['lastIncompleteCheckout'] ?? const {}),
+      metafields: _getMetafieldList(json['metafields'] ?? const {}),
     );
+  }
+
+  static _getMetafieldList(List json) {
+    List<Metafield> metafieldList = [];
+
+    json.forEach((metafield) {
+      if (metafield != null) {
+        metafieldList.add(Metafield.fromGraphJson(metafield ?? const {}));
+      }
+    });
+    return metafieldList;
   }
 
   factory ShopifyUser.fromJson(Map<String, dynamic> json) =>

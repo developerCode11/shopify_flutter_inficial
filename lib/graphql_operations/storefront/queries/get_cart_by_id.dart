@@ -1,13 +1,7 @@
 /// Mutation to create a checkout
-String cartCreate = r'''
-mutation cartCreate($input: CartInput!) {
-  cartCreate(input: $input) {
-    userErrors {
-      code
-      field
-      message
-    }
-      cart {
+String getCartById = r'''
+query cartLinesRemove($cartId: ID!) {
+  cart(id: $cartId) {
       id
       createdAt
       updatedAt
@@ -72,8 +66,6 @@ mutation cartCreate($input: CartInput!) {
           currencyCode
         }
       }
-    }
-  
   }
 }
 ''';

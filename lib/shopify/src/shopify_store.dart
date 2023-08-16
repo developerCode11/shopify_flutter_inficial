@@ -6,12 +6,15 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shopify_flutter/enums/enums.dart';
 import 'package:shopify_flutter/enums/src/sort_key_collection.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/mutations/cart_line_add.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/create_cart.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/product_create_media.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/mutations/remove_line_items_from_cart.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/staged_upload_create.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_collections_optimized.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_products_from_collection_by_id.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_products_on_query.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/queries/get_cart_by_id.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_collections_by_ids.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_product_recommendations.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_products_by_ids.dart';
@@ -22,6 +25,7 @@ import 'package:shopify_flutter/graphql_operations/storefront/queries/get_x_prod
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_x_products_on_query_after_cursor.dart';
 import 'package:shopify_flutter/mixins/src/shopfiy_error.dart';
 import 'package:shopify_flutter/models/src/cart/cart_input_model.dart';
+import 'package:shopify_flutter/models/src/cart/cart_model.dart' as cart;
 import 'package:shopify_flutter/models/src/collection/collections/collections.dart';
 import 'package:shopify_flutter/models/src/product/metafield/metafield.dart';
 import 'package:shopify_flutter/models/src/product/product.dart';
@@ -31,6 +35,7 @@ import 'package:shopify_flutter/models/src/product/stage_uploads/media.dart';
 import 'package:shopify_flutter/models/src/product/stage_uploads/stage_upload.dart';
 import 'package:shopify_flutter/models/src/product/stage_uploads/stage_uploads_input.dart';
 import 'package:shopify_flutter/models/src/shop/shop.dart';
+import 'package:shopify_flutter/shopify/shopify.dart';
 
 import '../../graphql_operations/storefront/queries/get_featured_collections.dart';
 import '../../graphql_operations/storefront/queries/get_n_products.dart';
@@ -611,7 +616,7 @@ class ShopifyStore with ShopifyError {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         metafields = (data['metafields'] as List)
-            .map((e) => Metafield.fromJson(e))
+            .map((e) => Metafield.fromGraphJson(e))
             .toList();
       }
     } catch (e) {
@@ -634,7 +639,7 @@ class ShopifyStore with ShopifyError {
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return Metafield.fromJson(data['metafield']);
+        return Metafield.fromGraphJson(data['metafield']);
       }
     } catch (e) {
       return null;
@@ -662,7 +667,7 @@ class ShopifyStore with ShopifyError {
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return Metafield.fromJson(data['metafield']);
+        return Metafield.fromGraphJson(data['metafield']);
       }
     } catch (e) {
       return null;
@@ -695,7 +700,7 @@ class ShopifyStore with ShopifyError {
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return Metafield.fromJson(data['metafield']);
+        return Metafield.fromGraphJson(data['metafield']);
       }
     } catch (e) {
       return null;
@@ -920,19 +925,137 @@ class ShopifyStore with ShopifyError {
     return false;
   }
 
-  Future<void> createCart({
+  Future<cart.Cart> createCart({
     required CartInput input,
+    required String customerId,
   }) async {
     final MutationOptions _options = MutationOptions(
       document: gql(cartCreate),
       variables: input.toJson(),
     );
-    final QueryResult result = await _graphQLClientAdmin!.mutate(_options);
+    final QueryResult result = await _graphQLClient!.mutate(_options);
     checkForError(
       result,
       key: 'cartCreate',
-      errorKey: 'cartUserErrors',
+      errorKey: 'userErrors',
     );
-    log(jsonEncode(result.data));
+    ShopifyCustomer _shopifyCustomer = ShopifyCustomer.instance;
+    cart.Cart cartModel =
+        cart.Cart.fromJson(result.data?['cartCreate']['cart'] ?? {});
+    await _shopifyCustomer.createMetaFieldForCustomer(
+      customerId: customerId.split('/').last,
+      namespace: 'cart',
+      key: 'cartId',
+      value: cartModel.id,
+      type: 'string',
+    );
+    return cartModel;
+  }
+
+  Future<cart.Cart> addLineItemsToCart({
+    required List<Lines> lines,
+    required String cartId,
+  }) async {
+    final MutationOptions _options = MutationOptions(
+      document: gql(cartLinesAdd),
+      variables: {
+        'cartId': cartId,
+        'lines': lines.map((e) => e.toJson()).toList(),
+      },
+    );
+    final QueryResult result = await _graphQLClient!.mutate(_options);
+    checkForError(
+      result,
+      key: 'cartLinesAdd',
+      errorKey: 'userErrors',
+    );
+    cart.Cart cartModel =
+        cart.Cart.fromJson(result.data?['cartLinesAdd']['cart'] ?? {});
+    return cartModel;
+  }
+
+  Future<cart.Cart> removeLineItemsFromCart({
+    required List<String> lineIds,
+    required String cartId,
+  }) async {
+    final MutationOptions _options = MutationOptions(
+      document: gql(cartLinesRemove),
+      variables: {
+        'cartId': cartId,
+        'lineIds': lineIds.map((e) => e.toString()).toList(),
+      },
+    );
+    final QueryResult result = await _graphQLClient!.mutate(_options);
+    checkForError(
+      result,
+      key: 'cartLinesRemove',
+      errorKey: 'userErrors',
+    );
+    cart.Cart cartModel =
+        cart.Cart.fromJson(result.data?['cartLinesRemove']['cart'] ?? {});
+    return cartModel;
+  }
+
+  Future<cart.Cart> updateLineItemsOfCart({
+    required List<Lines> lines,
+    required String cartId,
+    required String customerId,
+  }) async {
+    final MutationOptions _options = MutationOptions(
+      document: gql(cartLinesRemove),
+      variables: {
+        'cartId': cartId,
+        'lines': lines.map((e) => e.toJson()).toList(),
+      },
+    );
+    final QueryResult result = await _graphQLClient!.mutate(_options);
+    checkForError(
+      result,
+      key: 'cartLinesRemove',
+      errorKey: 'userErrors',
+    );
+    cart.Cart cartModel =
+        cart.Cart.fromJson(result.data?['cartLinesRemove']['cart'] ?? {});
+    ShopifyCustomer _shopifyCustomer = ShopifyCustomer.instance;
+    if (cartModel.lines?.edges?.isNotEmpty ?? false) {
+      await _shopifyCustomer.createMetaFieldForCustomer(
+        customerId: customerId.split('/').last,
+        namespace: 'cart',
+        key: 'cartId',
+        value: null,
+        type: 'string',
+      );
+    }
+    return cartModel;
+  }
+
+  Future<cart.Cart?> getCustomerCart({
+    required String customerId,
+    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+  }) async {
+    ShopifyCustomer _shopifyCustomer = ShopifyCustomer.instance;
+    final List<Metafield> metafields = await _shopifyCustomer
+        .getMetaFieldsFromCustomer(customerId.split('/').last);
+    if (metafields.isNotEmpty) {
+      List<Metafield> temp = metafields
+          .where((element) =>
+              element.key == 'cartId' && element.namespace == 'cart')
+          .toList();
+      if (temp.isNotEmpty) {
+        final WatchQueryOptions _options = WatchQueryOptions(
+          fetchPolicy: fetchPolicy,
+          document: gql(getCartById),
+          variables: {
+            'cartId': temp.first.value,
+          },
+        );
+        final QueryResult result =
+            await ShopifyConfig.graphQLClient!.query(_options);
+        checkForError(result);
+        cart.Cart cartModel = cart.Cart.fromJson(result.data?['cart'] ?? {});
+        return cartModel;
+      }
+    }
+    return null;
   }
 }

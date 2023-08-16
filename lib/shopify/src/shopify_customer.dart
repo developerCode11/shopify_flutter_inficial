@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/customer_address_create.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/customer_address_delete.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/customer_address_update.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/customer_update.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/customer_update_default_address.dart';
 import 'package:shopify_flutter/mixins/src/shopfiy_error.dart';
+import 'package:shopify_flutter/models/src/product/metafield/metafield.dart';
 import 'package:shopify_flutter/models/src/shopify_user/address/address.dart';
 
 import '../../shopify_config.dart';
@@ -172,5 +176,97 @@ class ShopifyCustomer with ShopifyError {
       key: 'customerDefaultAddressUpdate',
       errorKey: 'customerUserErrors',
     );
+  }
+
+  Future<Metafield?> createMetaFieldForCustomer(
+      {required String customerId,
+      required String namespace,
+      required String key,
+      String? value,
+      required String type}) async {
+    try {
+      http.Response response = await http.post(
+        Uri.parse(
+            "${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/customers/$customerId/metafields.json"),
+        body: jsonEncode({
+          "metafield": {
+            "namespace": namespace,
+            "key": key,
+            "value": value,
+            "type": type
+          }
+        }),
+        headers: {
+          'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return Metafield.fromGraphJson(data['metafield']);
+      }
+    } catch (e) {
+      return null;
+    }
+    return null;
+  }
+
+  Future<Metafield?> updateMetaFieldsFromMetaFieldForCustomer(
+    String customerId,
+    String metaFieldId,
+    String namespace,
+    String key,
+    String value,
+    String type,
+  ) async {
+    try {
+      http.Response response = await http.put(
+        Uri.parse(
+            "${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/customers/$customerId/metafields/$metaFieldId.json"),
+        body: {
+          "metafield": {
+            "namespace": namespace,
+            "key": key,
+            "value": value,
+            "type": type
+          }
+        },
+        headers: {
+          'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
+        },
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return Metafield.fromGraphJson(data['metafield']);
+      }
+    } catch (e) {
+      return null;
+    }
+    return null;
+  }
+
+  Future<List<Metafield>> getMetaFieldsFromCustomer(String customerID) async {
+    List<Metafield> metafields = [];
+    try {
+      http.Response response = await http.get(
+        Uri.parse(
+            "${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/customers/$customerID/metafields.json"),
+        headers: {
+          'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        metafields = (data['metafields'] as List)
+            .map((e) => Metafield.fromGraphJson(e))
+            .toList();
+        return metafields;
+      }
+    } catch (e) {
+      return [];
+    }
+    return metafields;
   }
 }

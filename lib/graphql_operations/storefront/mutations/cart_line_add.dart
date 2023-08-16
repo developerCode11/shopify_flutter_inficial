@@ -1,7 +1,7 @@
 /// Mutation to create a checkout
-String cartCreate = r'''
-mutation cartCreate($input: CartInput!) {
-  cartCreate(input: $input) {
+String cartLinesAdd = r'''
+mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
+  cartLinesAdd(cartId: $cartId, lines: $lines) {
     userErrors {
       code
       field
