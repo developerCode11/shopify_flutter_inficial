@@ -925,9 +925,7 @@ class ShopifyStore with ShopifyError {
   }) async {
     final MutationOptions _options = MutationOptions(
       document: gql(cartCreate),
-      variables: {
-        'input': input.toJson(),
-      },
+      variables: input.toJson(),
     );
     final QueryResult result = await _graphQLClientAdmin!.mutate(_options);
     checkForError(
