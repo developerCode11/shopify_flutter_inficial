@@ -935,5 +935,6 @@ class ShopifyStore with ShopifyError {
       key: 'cartCreate',
       errorKey: 'cartUserErrors',
     );
+    log(jsonEncode(result.data));
   }
 }
