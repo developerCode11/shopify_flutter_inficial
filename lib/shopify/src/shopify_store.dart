@@ -6,6 +6,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:shopify_flutter/enums/enums.dart';
 import 'package:shopify_flutter/enums/src/sort_key_collection.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/mutations/create_cart.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/product_create_media.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/staged_upload_create.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_collections_optimized.dart';
@@ -20,6 +21,7 @@ import 'package:shopify_flutter/graphql_operations/storefront/queries/get_x_prod
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_x_products_after_cursor_within_collection.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_x_products_on_query_after_cursor.dart';
 import 'package:shopify_flutter/mixins/src/shopfiy_error.dart';
+import 'package:shopify_flutter/models/src/cart/cart_input_model.dart';
 import 'package:shopify_flutter/models/src/collection/collections/collections.dart';
 import 'package:shopify_flutter/models/src/product/metafield/metafield.dart';
 import 'package:shopify_flutter/models/src/product/product.dart';
@@ -916,5 +918,22 @@ class ShopifyStore with ShopifyError {
       return true;
     }
     return false;
+  }
+
+  Future<void> createCart({
+    required CartInput input,
+  }) async {
+    final MutationOptions _options = MutationOptions(
+      document: gql(cartCreate),
+      variables: {
+        'input': input.toJson(),
+      },
+    );
+    final QueryResult result = await _graphQLClientAdmin!.mutate(_options);
+    checkForError(
+      result,
+      key: 'cartCreate',
+      errorKey: 'cartUserErrors',
+    );
   }
 }
