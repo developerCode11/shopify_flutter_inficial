@@ -1,6 +1,6 @@
 /// Mutation to create a checkout
 String cartLinesAdd = r'''
-mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
+mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!,$langCode: LanguageCode, $countryCode: CountryCode) @inContext(language: $langCode, country: $countryCode) {
   cartLinesAdd(cartId: $cartId, lines: $lines) {
     userErrors {
       code
@@ -15,6 +15,7 @@ mutation cartLinesAdd($cartId: ID!, $lines: [CartLineInput!]!) {
         edges {
           node {
             id
+            quantity
             merchandise {
               ... on ProductVariant {
                 id

@@ -269,4 +269,15 @@ class ShopifyCustomer with ShopifyError {
     }
     return metafields;
   }
+
+  Future<void> removeMetaField(
+      {required String customerID, required String metaFieldId}) async {
+    http.Response response = await http.delete(
+      Uri.parse(
+          "${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/customers/$customerID/metafields/$metaFieldId.json"),
+      headers: {
+        'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
+      },
+    );
+  }
 }

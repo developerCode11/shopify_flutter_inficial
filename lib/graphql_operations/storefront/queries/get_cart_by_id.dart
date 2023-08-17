@@ -1,6 +1,6 @@
 /// Mutation to create a checkout
 String getCartById = r'''
-query cartLinesRemove($cartId: ID!) {
+query getCartById($cartId: ID!,$langCode: LanguageCode, $countryCode: CountryCode) @inContext(language: $langCode, country: $countryCode) {
   cart(id: $cartId) {
       id
       createdAt
@@ -9,6 +9,7 @@ query cartLinesRemove($cartId: ID!) {
         edges {
           node {
             id
+            quantity
             merchandise {
               ... on ProductVariant {
                 id

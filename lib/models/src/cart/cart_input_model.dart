@@ -239,9 +239,15 @@ class Lines {
   String? merchandiseId;
   int? quantity;
   String? sellingPlanId;
+  String? id;
 
-  Lines(
-      {this.attributes, this.merchandiseId, this.quantity, this.sellingPlanId});
+  Lines({
+    this.attributes,
+    this.merchandiseId,
+    this.quantity,
+    this.sellingPlanId,
+    this.id,
+  });
 
   Lines.fromJson(Map<String, dynamic> json) {
     if (json['attributes'] != null) {
@@ -252,7 +258,10 @@ class Lines {
     }
     merchandiseId = json['merchandiseId'];
     quantity = json['quantity'];
-    if (sellingPlanId != null) {
+    if (json['id'] != null) {
+      id = json['id'];
+    }
+    if (json['sellingPlanId'] != null) {
       sellingPlanId = json['sellingPlanId'];
     }
   }
@@ -264,6 +273,9 @@ class Lines {
     }
     data['merchandiseId'] = merchandiseId;
     data['quantity'] = quantity;
+    if (id != null) {
+      data['id'] = id;
+    }
     if (sellingPlanId != null) {
       data['sellingPlanId'] = sellingPlanId;
     }

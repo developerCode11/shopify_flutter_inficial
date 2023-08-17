@@ -99,12 +99,14 @@ class Edges {
 
 class Node {
   String? id;
+  int? quantity;
   Merchandise? merchandise;
 
   Node({this.id, this.merchandise});
 
   Node.fromJson(Map<String, dynamic> json) {
     id = json['id'];
+    quantity = json['quantity'];
     merchandise = json['merchandise'] != null
         ? Merchandise.fromJson(json['merchandise'])
         : null;
@@ -113,6 +115,7 @@ class Node {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['id'] = id;
+    data['quantity'] = quantity;
     if (merchandise != null) {
       data['merchandise'] = merchandise!.toJson();
     }
@@ -144,7 +147,9 @@ class Merchandise {
     image = json['image'] != null ? Image.fromJson(json['image']) : null;
     priceV2 =
         json['priceV2'] != null ? PriceV2.fromJson(json['priceV2']) : null;
-    compareAtPriceV2 = json['compareAtPriceV2'];
+    compareAtPriceV2 = json['compareAtPriceV2'] != null
+        ? PriceV2.fromJson(json['compareAtPriceV2'])
+        : null;
     quantityAvailable = json['quantityAvailable'];
     if (json['selectedOptions'] != null) {
       selectedOptions = <SelectedOptions>[];
@@ -290,8 +295,8 @@ class Attributes {
 class Cost {
   PriceV2? totalAmount;
   PriceV2? subtotalAmount;
-  Null? totalTaxAmount;
-  Null? totalDutyAmount;
+  PriceV2? totalTaxAmount;
+  PriceV2? totalDutyAmount;
 
   Cost(
       {this.totalAmount,
@@ -306,8 +311,12 @@ class Cost {
     subtotalAmount = json['subtotalAmount'] != null
         ? PriceV2.fromJson(json['subtotalAmount'])
         : null;
-    totalTaxAmount = json['totalTaxAmount'];
-    totalDutyAmount = json['totalDutyAmount'];
+    totalTaxAmount = json['totalTaxAmount'] != null
+        ? PriceV2.fromJson(json['totalTaxAmount'])
+        : null;
+    totalDutyAmount = json['totalDutyAmount'] != null
+        ? PriceV2.fromJson(json['totalDutyAmount'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {

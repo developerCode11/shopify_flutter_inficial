@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:shopify_flutter/enums/enums.dart';
 import 'package:shopify_flutter/enums/src/sort_key_collection.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/cart_line_add.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/mutations/cart_lines_update.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/create_cart.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/product_create_media.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/remove_line_items_from_cart.dart';
@@ -70,10 +71,10 @@ class ShopifyStore with ShopifyError {
         'metafieldsNamespace': metafieldsNamespace,
       };
       if (langCode != null) {
-        variables['langCode'] = 'EN';
+        variables['langCode'] = langCode;
       }
       if (countryCode != null) {
-        variables['countryCode'] = 'IN';
+        variables['countryCode'] = countryCode;
       }
       _options = WatchQueryOptions(
         fetchPolicy: fetchPolicy,
@@ -928,10 +929,20 @@ class ShopifyStore with ShopifyError {
   Future<cart.Cart> createCart({
     required CartInput input,
     required String customerId,
+    String? langCode,
+    String? countryCode,
   }) async {
+    Map<String, dynamic> variables = input.toJson();
+    if (langCode != null) {
+      variables['langCode'] = langCode;
+    }
+    if (countryCode != null) {
+      variables['countryCode'] = countryCode;
+    }
+
     final MutationOptions _options = MutationOptions(
       document: gql(cartCreate),
-      variables: input.toJson(),
+      variables: variables,
     );
     final QueryResult result = await _graphQLClient!.mutate(_options);
     checkForError(
@@ -955,12 +966,16 @@ class ShopifyStore with ShopifyError {
   Future<cart.Cart> addLineItemsToCart({
     required List<Lines> lines,
     required String cartId,
+    String? langCode,
+    String? countryCode,
   }) async {
     final MutationOptions _options = MutationOptions(
       document: gql(cartLinesAdd),
       variables: {
         'cartId': cartId,
         'lines': lines.map((e) => e.toJson()).toList(),
+        if (langCode != null) 'langCode': langCode,
+        if (countryCode != null) 'countryCode': countryCode,
       },
     );
     final QueryResult result = await _graphQLClient!.mutate(_options);
@@ -977,35 +992,17 @@ class ShopifyStore with ShopifyError {
   Future<cart.Cart> removeLineItemsFromCart({
     required List<String> lineIds,
     required String cartId,
+    required String customerId,
+    String? langCode,
+    String? countryCode,
   }) async {
     final MutationOptions _options = MutationOptions(
       document: gql(cartLinesRemove),
       variables: {
         'cartId': cartId,
         'lineIds': lineIds.map((e) => e.toString()).toList(),
-      },
-    );
-    final QueryResult result = await _graphQLClient!.mutate(_options);
-    checkForError(
-      result,
-      key: 'cartLinesRemove',
-      errorKey: 'userErrors',
-    );
-    cart.Cart cartModel =
-        cart.Cart.fromJson(result.data?['cartLinesRemove']['cart'] ?? {});
-    return cartModel;
-  }
-
-  Future<cart.Cart> updateLineItemsOfCart({
-    required List<Lines> lines,
-    required String cartId,
-    required String customerId,
-  }) async {
-    final MutationOptions _options = MutationOptions(
-      document: gql(cartLinesRemove),
-      variables: {
-        'cartId': cartId,
-        'lines': lines.map((e) => e.toJson()).toList(),
+        if (langCode != null) 'langCode': langCode,
+        if (countryCode != null) 'countryCode': countryCode,
       },
     );
     final QueryResult result = await _graphQLClient!.mutate(_options);
@@ -1017,22 +1014,54 @@ class ShopifyStore with ShopifyError {
     cart.Cart cartModel =
         cart.Cart.fromJson(result.data?['cartLinesRemove']['cart'] ?? {});
     ShopifyCustomer _shopifyCustomer = ShopifyCustomer.instance;
-    if (cartModel.lines?.edges?.isNotEmpty ?? false) {
-      await _shopifyCustomer.createMetaFieldForCustomer(
-        customerId: customerId.split('/').last,
-        namespace: 'cart',
-        key: 'cartId',
-        value: null,
-        type: 'string',
-      );
+    if (cartModel.lines?.edges?.isEmpty ?? true) {
+      final List<Metafield> metafields = await _shopifyCustomer
+          .getMetaFieldsFromCustomer(customerId.split('/').last);
+      List<Metafield> temp = metafields
+          .where((element) =>
+              element.key == 'cartId' && element.namespace == 'cart')
+          .toList();
+      if (temp.isNotEmpty) {
+        await _shopifyCustomer.removeMetaField(
+          customerID: customerId.split('/').last,
+          metaFieldId: temp.first.id,
+        );
+      }
     }
     return cartModel;
   }
 
-  Future<cart.Cart?> getCustomerCart({
-    required String customerId,
-    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+  Future<cart.Cart> updateLineItemsOfCart({
+    required List<Lines> lines,
+    required String cartId,
+    String? langCode,
+    String? countryCode,
   }) async {
+    final MutationOptions _options = MutationOptions(
+      document: gql(cartLinesUpdate),
+      variables: {
+        'cartId': cartId,
+        'lines': lines.map((e) => e.toJson()).toList(),
+        if (langCode != null) 'langCode': langCode,
+        if (countryCode != null) 'countryCode': countryCode,
+      },
+    );
+    final QueryResult result = await _graphQLClient!.mutate(_options);
+    checkForError(
+      result,
+      key: 'cartLinesUpdate',
+      errorKey: 'userErrors',
+    );
+    cart.Cart cartModel =
+        cart.Cart.fromJson(result.data?['cartLinesUpdate']['cart'] ?? {});
+    return cartModel;
+  }
+
+  Future<cart.Cart?> getCustomerCart(
+      {required String customerId,
+      FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+      String? langCode,
+      String? countryCode}) async {
     ShopifyCustomer _shopifyCustomer = ShopifyCustomer.instance;
     final List<Metafield> metafields = await _shopifyCustomer
         .getMetaFieldsFromCustomer(customerId.split('/').last);
@@ -1047,11 +1076,22 @@ class ShopifyStore with ShopifyError {
           document: gql(getCartById),
           variables: {
             'cartId': temp.first.value,
+            if (langCode != null) 'langCode': langCode,
+            if (countryCode != null) 'countryCode': countryCode,
           },
         );
+
+        print({
+          'cartId': temp.first.value,
+          if (langCode != null) 'langCode': langCode,
+          if (countryCode != null) 'countryCode': countryCode,
+        });
+
         final QueryResult result =
             await ShopifyConfig.graphQLClient!.query(_options);
-        checkForError(result);
+        checkForError(
+          result,
+        );
         cart.Cart cartModel = cart.Cart.fromJson(result.data?['cart'] ?? {});
         return cartModel;
       }
