@@ -1080,13 +1080,6 @@ class ShopifyStore with ShopifyError {
             if (countryCode != null) 'countryCode': countryCode,
           },
         );
-
-        print({
-          'cartId': temp.first.value,
-          if (langCode != null) 'langCode': langCode,
-          if (countryCode != null) 'countryCode': countryCode,
-        });
-
         final QueryResult result =
             await ShopifyConfig.graphQLClient!.query(_options);
         checkForError(
