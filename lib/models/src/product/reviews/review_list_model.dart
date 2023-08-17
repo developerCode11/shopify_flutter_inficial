@@ -132,7 +132,7 @@ class Reviews {
 
 class Reviewer {
   int? id;
-  String? externalId;
+  int? externalId;
   String? email;
   String? name;
   String? phone;
