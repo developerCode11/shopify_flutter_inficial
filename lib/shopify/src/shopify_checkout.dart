@@ -1,6 +1,7 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:shopify_flutter/enums/src/payment_token_type.dart';
 import 'package:shopify_flutter/enums/src/sort_key_order.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/mutations/cancel_fulfillment_order.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/checkout_complete_free.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/checkout_complete_with_credit_card_V2.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/checkout_line_item_add.dart';
@@ -11,6 +12,7 @@ import 'package:shopify_flutter/graphql_operations/storefront/mutations/checkout
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/checkout_shipping_line_update.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/complete_checkout_token_v3.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/create_checkout.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/mutations/update_order_shipping_address.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_checkout_info_requires_shipping.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_checkout_info_with_payment_id.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_checkout_info_with_payment_id_without_shipping_rates.dart';
@@ -19,6 +21,7 @@ import 'package:shopify_flutter/mixins/src/shopfiy_error.dart';
 import 'package:shopify_flutter/models/src/checkout/line_item/line_item.dart';
 import 'package:shopify_flutter/models/src/order/order.dart';
 import 'package:shopify_flutter/models/src/order/orders/orders.dart';
+import 'package:shopify_flutter/models/src/order/shipping_address/shipping_address.dart';
 import 'package:shopify_flutter/models/src/product/price_v_2/price_v_2.dart';
 import 'package:shopify_flutter/models/src/shopify_user/address/address.dart';
 
@@ -40,6 +43,7 @@ class ShopifyCheckout with ShopifyError {
   static final ShopifyCheckout instance = ShopifyCheckout._();
 
   GraphQLClient? get _graphQLClient => ShopifyConfig.graphQLClient;
+  GraphQLClient? get _graphQLAdmin => ShopifyConfig.graphQLClientAdmin;
 
   /// Returns a [Checkout] object.
   ///
@@ -120,7 +124,7 @@ class ShopifyCheckout with ShopifyError {
     bool reverse = true,
   }) async {
     // final QueryOptions _options =
-    //     WatchQueryOptions(document: gql(getAllOrdersQuery), variables: {
+    //     WatchQueryOptions(document: gql(getAllOrdersQuery2), variables: {
     //   'accessToken': customerAccessToken,
     //   'sortKey': sortKey.parseToString(),
     //   'reverse': reverse
@@ -142,6 +146,59 @@ class ShopifyCheckout with ShopifyError {
     //     (((result.data ?? const {})['customer'] ?? const {})['orders'] ??
     //         const {}));
     return orders.orderList;
+  }
+
+  Future<void> cancelOrder(
+    String orderId,
+  ) async {
+    final MutationOptions _options = MutationOptions(
+      document: gql(fulfillmentOrderCancel),
+      variables: {
+        'id': orderId,
+      },
+    );
+    final QueryResult result = await _graphQLAdmin!.mutate(_options);
+    checkForError(
+      result,
+      key: 'fulfillmentOrderCancel',
+      errorKey: 'userErrors',
+    );
+  }
+
+  Future<void> updateOrderShippingAddress(
+      {required String orderId,
+      required ShippingAddress address,
+      String? note}) async {
+    final MutationOptions _options = MutationOptions(
+      document: gql(orderUpdate),
+      variables: {
+        "input": {
+          "id": orderId,
+          if (note != null) "note": "",
+          "shippingAddress": {
+            "address1": address.address1,
+            "address2": address.address2,
+            "city": address.city,
+            "company": address.company,
+            "country": address.country,
+            "countryCode": address.countryCodeV2,
+            "firstName": address.firstName,
+            "id": address.id,
+            "lastName": address.lastName,
+            "phone": address.phone,
+            "province": address.province,
+            "provinceCode": address.provinceCode,
+            "zip": address.zip,
+          },
+        }
+      },
+    );
+    final QueryResult result = await _graphQLAdmin!.mutate(_options);
+    checkForError(
+      result,
+      key: 'fulfillmentOrderCancel',
+      errorKey: 'userErrors',
+    );
   }
 
   /// Replaces the [LineItems] in the [Checkout] associated to the [checkoutId].

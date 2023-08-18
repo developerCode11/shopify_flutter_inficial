@@ -8,6 +8,8 @@ customer(customerAccessToken: $accessToken) {
           id
           email
           currencyCode
+          cancelReason
+          canceledAt
           customerUrl
           financialStatus
           fulfillmentStatus
