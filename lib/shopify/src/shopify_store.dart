@@ -269,12 +269,13 @@ class ShopifyStore with ShopifyError {
       );
       final QueryResult result = await _graphQLClient!.query(_options);
       checkForError(result);
+
       var newResponse = List.generate(result.data!['nodes']?.length ?? 0,
           (index) => {"node": (result.data!['nodes'] ?? const {})[index]});
       var tempCollection = {"edges": newResponse};
       return Collections.fromGraphJson(tempCollection).collectionList;
     } catch (e) {
-      log(e.toString());
+      print(e);
     }
     return [Collection.fromJson({})];
   }
