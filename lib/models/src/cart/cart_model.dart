@@ -125,7 +125,9 @@ class Node {
 
 class Merchandise {
   String? id;
+  String? productId;
   String? title;
+  String? productTitle;
   Image? image;
   PriceV2? priceV2;
   PriceV2? compareAtPriceV2;
@@ -135,6 +137,8 @@ class Merchandise {
   Merchandise(
       {this.id,
       this.title,
+      this.productId,
+      this.productTitle,
       this.image,
       this.priceV2,
       this.compareAtPriceV2,
@@ -144,6 +148,10 @@ class Merchandise {
   Merchandise.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     title = json['title'];
+    if (json['product'] != null) {
+      productId = json['product']['id'];
+      productTitle = json['product']['title'];
+    }
     image = json['image'] != null ? Image.fromJson(json['image']) : null;
     priceV2 =
         json['priceV2'] != null ? PriceV2.fromJson(json['priceV2']) : null;

@@ -23,7 +23,7 @@ _$_ShopifyUser _$$_ShopifyUserFromJson(Map<String, dynamic> json) =>
           : Address.fromJson(json['defaultAddress'] as Map<String, dynamic>),
       tags: (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
       metafields: (json['metafields'] as List<dynamic>?)
-          ?.map((e) => Metafield.fromGraphJson(e as Map<String, dynamic>))
+          ?.map((e) => Metafield.fromJson(e as Map<String, dynamic>))
           .toList(),
       lastIncompleteCheckout: json['lastIncompleteCheckout'] == null
           ? null

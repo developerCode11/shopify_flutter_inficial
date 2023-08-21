@@ -38,6 +38,10 @@ customer(customerAccessToken: $accessToken) {
                     amount
                     currencyCode
                   }
+                  product {
+                    id
+                    title
+                  }
                   title
                   image {
                     altText
@@ -47,6 +51,10 @@ customer(customerAccessToken: $accessToken) {
                   compareAtPriceV2 {
                     amount
                     currencyCode
+                  }
+                  selectedOptions {
+                    name
+                    value
                   }
                   weight
                   weightUnit

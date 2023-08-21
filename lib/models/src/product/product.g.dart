@@ -26,7 +26,7 @@ _$_Product _$$_ProductFromJson(Map<String, dynamic> json) => _$_Product(
           .toList(),
       vendor: json['vendor'] as String,
       metafields: (json['metafields'] as List<dynamic>)
-          .map((e) => Metafield.fromGraphJson(e as Map<String, dynamic>))
+          .map((e) => Metafield.fromJson(e as Map<String, dynamic>))
           .toList(),
       collectionList: (json['collectionList'] as List<dynamic>?)
           ?.map(

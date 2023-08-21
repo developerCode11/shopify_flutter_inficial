@@ -14,6 +14,10 @@ query getCartById($cartId: ID!,$langCode: LanguageCode, $countryCode: CountryCod
               ... on ProductVariant {
                 id
                 title
+                product {
+                  id
+                  title
+                }
                 image {
                   altText
                   id
