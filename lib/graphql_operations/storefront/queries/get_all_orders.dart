@@ -1,6 +1,6 @@
 /// Query to get all orders
 const String getAllOrdersQuery = r'''
-query getOrders($sortKey : OrderSortKeys, $accessToken : String!, $reverse: Boolean){
+query getOrders($sortKey : OrderSortKeys, $accessToken : String!, $reverse: Boolean, $langCode: LanguageCode, $countryCode: CountryCode) @inContext(language: $langCode, country: $countryCode) {
 customer(customerAccessToken: $accessToken) {
     orders(first: 250, sortKey: $sortKey, reverse: $reverse) {
       edges {

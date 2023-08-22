@@ -122,6 +122,8 @@ class ShopifyCheckout with ShopifyError {
     String customerAccessToken, {
     SortKeyOrder sortKey = SortKeyOrder.PROCESSED_AT,
     bool reverse = true,
+    String? langCode,
+    String? countryCode,
   }) async {
     // final QueryOptions _options =
     //     WatchQueryOptions(document: gql(getAllOrdersQuery2), variables: {
@@ -131,12 +133,20 @@ class ShopifyCheckout with ShopifyError {
     // });
     // final QueryResult result =
     //     await ShopifyConfig.graphQLClient!.query(_options);
-    final MutationOptions _options =
-        MutationOptions(document: gql(getAllOrdersQuery), variables: {
+
+    Map<String, dynamic> variables = <String, dynamic>{
       'accessToken': customerAccessToken,
       'sortKey': sortKey.parseToString(),
       'reverse': reverse
-    });
+    };
+    if (langCode != null) {
+      variables['langCode'] = langCode;
+    }
+    if (countryCode != null) {
+      variables['countryCode'] = countryCode;
+    }
+    final MutationOptions _options =
+        MutationOptions(document: gql(getAllOrdersQuery), variables: variables);
     QueryResult result = await _graphQLClient!.mutate(_options);
     checkForError(result);
     final orderResult =
