@@ -20,6 +20,10 @@ mutation cartLinesUpdate($cartId: ID!, $lines: [CartLineUpdateInput!]!,$langCode
               ... on ProductVariant {
                 id
                 title
+                product {
+                  id
+                  title
+                }
                 image {
                   altText
                   id

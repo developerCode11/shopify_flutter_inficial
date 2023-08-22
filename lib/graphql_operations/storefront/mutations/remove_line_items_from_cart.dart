@@ -20,6 +20,10 @@ mutation cartLinesRemove($cartId: ID!, $lineIds: [ID!]!,$langCode: LanguageCode,
               ... on ProductVariant {
                 id
                 title
+                product {
+                  id
+                  title
+                }
                 image {
                   altText
                   id

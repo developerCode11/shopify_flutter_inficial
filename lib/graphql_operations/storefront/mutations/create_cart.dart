@@ -19,6 +19,10 @@ mutation cartCreate($input: CartInput!,$langCode: LanguageCode, $countryCode: Co
               ... on ProductVariant {
                 id
                 title
+                product {
+                  id
+                  title
+                }
                 image {
                   altText
                   id
