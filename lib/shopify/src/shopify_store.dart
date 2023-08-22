@@ -17,6 +17,7 @@ import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_pr
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_products_on_query.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_cart_by_id.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_collections_by_ids.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/queries/get_localization.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_product_recommendations.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_products_by_ids.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_shop.dart';
@@ -36,6 +37,7 @@ import 'package:shopify_flutter/models/src/product/stage_uploads/media.dart';
 import 'package:shopify_flutter/models/src/product/stage_uploads/stage_upload.dart';
 import 'package:shopify_flutter/models/src/product/stage_uploads/stage_uploads_input.dart';
 import 'package:shopify_flutter/models/src/shop/shop.dart';
+import 'package:shopify_flutter/models/src/shop/shopify_localization.dart';
 import 'package:shopify_flutter/shopify/shopify.dart';
 
 import '../../graphql_operations/storefront/queries/get_featured_collections.dart';
@@ -290,6 +292,18 @@ class ShopifyStore with ShopifyError {
     final QueryResult result = await _graphQLClient!.query(_options);
     checkForError(result);
     return Shop.fromJson(result.data!['shop']);
+  }
+
+  /// Returns the Shop.
+  Future<ShopifyLocalization> getStoreLocalization(
+      {FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork}) async {
+    final WatchQueryOptions _options = WatchQueryOptions(
+      fetchPolicy: fetchPolicy,
+      document: gql(getLocalization),
+    );
+    final QueryResult result = await _graphQLClient!.query(_options);
+    checkForError(result);
+    return ShopifyLocalization.fromJson(result.data ?? {});
   }
 
   /// Returns a collection by handle.

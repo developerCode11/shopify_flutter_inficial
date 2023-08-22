@@ -46,26 +46,23 @@ class HomeTabState extends State<HomeTab> {
 
   Future<void> _fetchProducts() async {
     final shopifyStore = ShopifyStore.instance;
-
-    final review = await shopifyStore.getCountOfReview(
-      apiToken: 'GGXjQo-bjg_t38OdAHbQ3oDbAPQ',
-      productId: '8318751768897',
-    );
-    print(review);
+    //
+    await shopifyStore.getStoreLocalization();
+    // log(jsonEncode(review.toJson()));
 
     final bestSellingProducts = await shopifyStore.getNProducts(6,
         sortKey: SortKeyProduct.BEST_SELLING);
-    shopifyStore.getCollectionsByIds([
-      'gid://shopify/Collection/453095588161',
-      'gid://shopify/Collection/453095457089',
-      'gid://shopify/Collection/453095620929',
-      'gid://shopify/Collection/453095817537',
-      'gid://shopify/Collection/453095686465',
-      'gid://shopify/Collection/453095752001',
-      'gid://shopify/Collection/453096931649',
-    ]).then((value) {
-      print(value?.length);
-    });
+    // shopifyStore.getCollectionsByIds([
+    //   'gid://shopify/Collection/453095588161',
+    //   'gid://shopify/Collection/453095457089',
+    //   'gid://shopify/Collection/453095620929',
+    //   'gid://shopify/Collection/453095817537',
+    //   'gid://shopify/Collection/453095686465',
+    //   'gid://shopify/Collection/453095752001',
+    //   'gid://shopify/Collection/453096931649',
+    // ]).then((value) {
+    //   print(value?.length);
+    // });
     if (mounted) {
       setState(() {
         products = bestSellingProducts ?? [];
