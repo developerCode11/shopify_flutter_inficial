@@ -1141,7 +1141,58 @@ class ShopifyStore with ShopifyError {
         ((result.data?['collection']?['products']?['filters'] ?? []) as List)
             .map((e) => Filters.fromJson(e))
             .toList();
+    for (var filter in filters) {
+      if (filter.type == "PRICE_RANGE") {
+        double minPrice = double.parse(
+            jsonDecode(filter.values?.first.input ?? '')['price']['min']
+                .toString());
+        double maxPrice = double.parse(
+            jsonDecode(filter.values?.first.input ?? '')['price']['max']
+                .toString());
+        int numberOfChunks = 7;
+        List<PriceChunk> priceChunks =
+            dividePriceRange(minPrice, maxPrice, numberOfChunks);
+        filter.values = [];
+        for (var chunk in priceChunks) {
+          filter.values?.add(Values(
+            label: '${chunk.minPrice.toInt()} to ${chunk.maxPrice.toInt()}',
+            count: 0,
+            input: jsonEncode({
+              'min': chunk.minPrice.toInt(),
+              'max': chunk.maxPrice.toInt(),
+            }),
+          ));
+        }
+      }
+    }
+
     print(filters.length);
     return filters;
   }
+}
+
+class PriceChunk {
+  final double minPrice;
+  final double maxPrice;
+
+  PriceChunk(this.minPrice, this.maxPrice);
+}
+
+List<PriceChunk> dividePriceRange(double min, double max, int chunks) {
+  double chunkSize = (max - min) / chunks;
+
+  List<PriceChunk> priceChunks = [];
+  for (int i = 0; i < chunks; i++) {
+    double chunkMin = min + i * chunkSize;
+    double chunkMax = chunkMin + chunkSize;
+
+    if (i == chunks - 1) {
+      // Adjust the last chunk's max value to match the original max value
+      chunkMax = max;
+    }
+
+    priceChunks.add(PriceChunk(chunkMin, chunkMax));
+  }
+
+  return priceChunks;
 }
