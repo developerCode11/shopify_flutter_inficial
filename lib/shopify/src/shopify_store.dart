@@ -517,6 +517,7 @@ class ShopifyStore with ShopifyError {
     bool reverse = false,
     String? langCode,
     String? countryCode,
+    List<Map<String, dynamic>>? filters,
   }) async {
     String? cursor = startCursor;
     Map<String, dynamic> variables = <String, dynamic>{
@@ -532,6 +533,10 @@ class ShopifyStore with ShopifyError {
     if (countryCode != null) {
       variables['countryCode'] = countryCode;
     }
+    if (filters != null) {
+      variables['filters'] = filters;
+    }
+
     final WatchQueryOptions _options = WatchQueryOptions(
       fetchPolicy: fetchPolicy,
       document: gql(getXProductsAfterCursorWithinCollectionQuery),
@@ -1165,8 +1170,6 @@ class ShopifyStore with ShopifyError {
         }
       }
     }
-
-    print(filters.length);
     return filters;
   }
 }

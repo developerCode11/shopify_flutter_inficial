@@ -104,13 +104,24 @@ class CollectionDetailScreenState extends State<CollectionDetailScreen> {
   Future<void> _fetchProductsByCollectionId() async {
     try {
       final shopifyStore = ShopifyStore.instance;
-      final products =
-          await shopifyStore.getXProductsAfterCursorWithinCollection(
-        widget.collectionId,
-        4,
-        startCursor: null,
-        sortKey: SortKeyProductCollection.RELEVANCE,
-      );
+      final products = await shopifyStore
+          .getXProductsAfterCursorWithinCollection(widget.collectionId, 100,
+              startCursor: null,
+              sortKey: SortKeyProductCollection.RELEVANCE,
+              filters: [
+            // {
+            //   "productType": "unisex socks",
+            // },
+            // {
+            //   "productType": "unisex scarves",
+            // },
+            // {
+            //   "variantOption": {"name": "color", "value": "Red"}
+            // },
+            // {
+            //   "variantOption": {"name": "color", "value": "White"}
+            // }
+          ]);
       if (mounted) {
         setState(() {
           this.products = products ?? [];
