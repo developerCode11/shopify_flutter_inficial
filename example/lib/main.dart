@@ -8,9 +8,9 @@ import 'screens/search_tab.dart';
 
 void main() {
   ShopifyConfig.setConfig(
-    storefrontAccessToken: '33d6012c6d307f24e6a3c51770d04451',
-    adminAccessToken: "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",
-    storeUrl: 'cluewing.myshopify.com',
+    storefrontAccessToken: '5360c2d09f2315564d9972db08122164',
+    adminAccessToken: "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",
+    storeUrl: 'https://inficial-demo-store.myshopify.com/',
     storefrontApiVersion: '2023-07',
   );
   runApp(const MyApp());

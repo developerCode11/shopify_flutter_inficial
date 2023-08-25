@@ -47,22 +47,21 @@ class HomeTabState extends State<HomeTab> {
   Future<void> _fetchProducts() async {
     final shopifyStore = ShopifyStore.instance;
     //
-    await shopifyStore.getStoreLocalization();
+    // await shopifyStore.getStoreLocalization();
     // log(jsonEncode(review.toJson()));
 
+    shopifyStore.getAllFilters().then((value) {}).catchError((e) {
+      print(e);
+    });
+
+    shopifyStore.getCollectionsByIds([
+      'gid://shopify/Collection/458453352735',
+    ]).then((value) {
+      print(value?.first.handle);
+    });
     final bestSellingProducts = await shopifyStore.getNProducts(6,
         sortKey: SortKeyProduct.BEST_SELLING);
-    // shopifyStore.getCollectionsByIds([
-    //   'gid://shopify/Collection/453095588161',
-    //   'gid://shopify/Collection/453095457089',
-    //   'gid://shopify/Collection/453095620929',
-    //   'gid://shopify/Collection/453095817537',
-    //   'gid://shopify/Collection/453095686465',
-    //   'gid://shopify/Collection/453095752001',
-    //   'gid://shopify/Collection/453096931649',
-    // ]).then((value) {
-    //   print(value?.length);
-    // });
+
     if (mounted) {
       setState(() {
         products = bestSellingProducts ?? [];

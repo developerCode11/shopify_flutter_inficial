@@ -13,6 +13,7 @@ import 'package:shopify_flutter/graphql_operations/storefront/mutations/product_
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/remove_line_items_from_cart.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/mutations/staged_upload_create.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_collections_optimized.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_filter_by_collection.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_products_from_collection_by_id.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_products_on_query.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_cart_by_id.dart';
@@ -29,6 +30,7 @@ import 'package:shopify_flutter/mixins/src/shopfiy_error.dart';
 import 'package:shopify_flutter/models/src/cart/cart_input_model.dart';
 import 'package:shopify_flutter/models/src/cart/cart_model.dart' as cart;
 import 'package:shopify_flutter/models/src/collection/collections/collections.dart';
+import 'package:shopify_flutter/models/src/collection/filters.dart';
 import 'package:shopify_flutter/models/src/product/metafield/metafield.dart';
 import 'package:shopify_flutter/models/src/product/product.dart';
 import 'package:shopify_flutter/models/src/product/products/products.dart';
@@ -271,7 +273,14 @@ class ShopifyStore with ShopifyError {
       );
       final QueryResult result = await _graphQLClient!.query(_options);
       checkForError(result);
-
+      http.Response response = await http.get(
+        Uri.parse(
+            "${ShopifyConfig.storeUrl}/admin/api/${ShopifyConfig.apiVersion}/collections/${idList.first.split('/').last}.json"),
+        headers: {
+          'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
+        },
+      );
+      log(response.body);
       var newResponse = List.generate(result.data!['nodes']?.length ?? 0,
           (index) => {"node": (result.data!['nodes'] ?? const {})[index]});
       var tempCollection = {"edges": newResponse};
@@ -1105,5 +1114,36 @@ class ShopifyStore with ShopifyError {
       }
     }
     return null;
+  }
+
+  Future<List<Filters>> getAllFilters(
+      {SortKeyCollection sortKeyCollection = SortKeyCollection.UPDATED_AT,
+      bool reverse = false,
+      String? langCode,
+      String? countryCode,
+      FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork}) async {
+    String? cursor;
+    WatchQueryOptions _options;
+    Map<String, dynamic> variables = <String, dynamic>{
+      'cursor': cursor,
+    };
+    if (langCode != null) {
+      variables['langCode'] = langCode;
+    }
+    if (countryCode != null) {
+      variables['countryCode'] = countryCode;
+    }
+    _options = WatchQueryOptions(
+      fetchPolicy: fetchPolicy,
+      document: gql(getAllFilterByCollection),
+      variables: variables,
+    );
+    final QueryResult result = await _graphQLClient!.query(_options);
+    checkForError(result);
+    List<Filters> filters =
+        ((result.data?['collection']?['products']?['filters'] ?? []) as List)
+            .map((e) => Filters.fromJson(e))
+            .toList();
+    return filters;
   }
 }
