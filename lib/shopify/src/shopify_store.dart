@@ -280,7 +280,6 @@ class ShopifyStore with ShopifyError {
           'X-Shopify-Access-Token': ShopifyConfig.adminAccessToken,
         },
       );
-      log(response.body);
       var newResponse = List.generate(result.data!['nodes']?.length ?? 0,
           (index) => {"node": (result.data!['nodes'] ?? const {})[index]});
       var tempCollection = {"edges": newResponse};
@@ -1116,14 +1115,14 @@ class ShopifyStore with ShopifyError {
     return null;
   }
 
-  Future<List<Filters>> getAllFilters(
+  Future<List<Filters>> getAllFiltersByCollectionId(
       {String? langCode,
-      required String handle,
+      required String id,
       String? countryCode,
       FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork}) async {
     WatchQueryOptions _options;
     Map<String, dynamic> variables = <String, dynamic>{
-      'collectionHandle': handle,
+      'id': id,
     };
     if (langCode != null) {
       variables['langCode'] = langCode;

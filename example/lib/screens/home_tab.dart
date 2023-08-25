@@ -51,7 +51,8 @@ class HomeTabState extends State<HomeTab> {
     // log(jsonEncode(review.toJson()));
 
     shopifyStore
-        .getAllFilters(handle: 'woman')
+        .getAllFiltersByCollectionId(
+            id: 'gid://shopify/Collection/458452828447')
         .then((value) {})
         .catchError((e) {
       print(e);
