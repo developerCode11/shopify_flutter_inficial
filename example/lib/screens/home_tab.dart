@@ -50,7 +50,10 @@ class HomeTabState extends State<HomeTab> {
     // await shopifyStore.getStoreLocalization();
     // log(jsonEncode(review.toJson()));
 
-    shopifyStore.getAllFilters().then((value) {}).catchError((e) {
+    shopifyStore
+        .getAllFilters(handle: 'woman')
+        .then((value) {})
+        .catchError((e) {
       print(e);
     });
 

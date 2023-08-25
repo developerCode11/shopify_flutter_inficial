@@ -1117,15 +1117,13 @@ class ShopifyStore with ShopifyError {
   }
 
   Future<List<Filters>> getAllFilters(
-      {SortKeyCollection sortKeyCollection = SortKeyCollection.UPDATED_AT,
-      bool reverse = false,
-      String? langCode,
+      {String? langCode,
+      required String handle,
       String? countryCode,
       FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork}) async {
-    String? cursor;
     WatchQueryOptions _options;
     Map<String, dynamic> variables = <String, dynamic>{
-      'cursor': cursor,
+      'collectionHandle': handle,
     };
     if (langCode != null) {
       variables['langCode'] = langCode;
@@ -1144,6 +1142,7 @@ class ShopifyStore with ShopifyError {
         ((result.data?['collection']?['products']?['filters'] ?? []) as List)
             .map((e) => Filters.fromJson(e))
             .toList();
+    print(filters.length);
     return filters;
   }
 }
