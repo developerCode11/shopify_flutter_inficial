@@ -40,6 +40,7 @@ class Values {
   String? label;
   int? count;
   String? input;
+  bool isSelected = false;
 
   Values({this.id, this.label, this.count, this.input});
 
