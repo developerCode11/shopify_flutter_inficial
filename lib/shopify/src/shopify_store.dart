@@ -512,7 +512,7 @@ class ShopifyStore with ShopifyError {
     String id,
     int limit, {
     String? startCursor,
-    SortKeyProductCollection sortKey = SortKeyProductCollection.BEST_SELLING,
+    SortKeyProductCollection sortKey = SortKeyProductCollection.RELEVANCE,
     FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
     bool reverse = false,
     String? langCode,
@@ -533,10 +533,7 @@ class ShopifyStore with ShopifyError {
     if (countryCode != null) {
       variables['countryCode'] = countryCode;
     }
-    if (filters != null) {
-      variables['filters'] = filters;
-    }
-
+    variables['filters'] = filters ?? [];
     final WatchQueryOptions _options = WatchQueryOptions(
       fetchPolicy: fetchPolicy,
       document: gql(getXProductsAfterCursorWithinCollectionQuery),
@@ -544,6 +541,7 @@ class ShopifyStore with ShopifyError {
     );
     final QueryResult result = await _graphQLClient!.query(_options);
     checkForError(result);
+    // log(jsonEncode(result.data));
     return (Collection.fromGraphJson(result.data!)).products.productList;
   }
 

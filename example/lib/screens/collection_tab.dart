@@ -109,12 +109,12 @@ class CollectionDetailScreenState extends State<CollectionDetailScreen> {
               startCursor: null,
               sortKey: SortKeyProductCollection.RELEVANCE,
               filters: [
-            // {
-            //   "productType": "unisex socks",
-            // },
-            // {
-            //   "productType": "unisex scarves",
-            // },
+            {
+              "productType": "unisex socks",
+            },
+            {
+              "productType": "unisex scarves",
+            },
             // {
             //   "variantOption": {"name": "color", "value": "Red"}
             // },
