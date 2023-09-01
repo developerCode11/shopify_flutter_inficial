@@ -90,7 +90,7 @@ class ShopifyStore with ShopifyError {
       tempProduct =
           (Products.fromGraphJson((result.data ?? const {})["products"] ?? {}));
 
-      productList += tempProduct.productList;
+      productList += tempProduct.productList.toList();
       cursor = productList.isNotEmpty ? productList.last.cursor : '';
     } while ((tempProduct.hasNextPage == true));
     return productList;
@@ -129,7 +129,7 @@ class ShopifyStore with ShopifyError {
     checkForError(result);
     tempProduct =
         (Products.fromGraphJson((result.data ?? const {})["products"] ?? {}));
-    productList += tempProduct.productList;
+    productList += tempProduct.productList.toList();
     return productList;
   }
 
@@ -163,7 +163,7 @@ class ShopifyStore with ShopifyError {
       'edges': List.generate(response['nodes'].length,
           (index) => {'node': response['nodes'][index]})
     };
-    productList = Products.fromGraphJson(newResponse).productList;
+    productList = Products.fromGraphJson(newResponse).productList.toList();
     return productList;
   }
 
@@ -209,7 +209,8 @@ class ShopifyStore with ShopifyError {
     checkForError(result);
     productList =
         (Products.fromGraphJson((result.data ?? const {})["products"] ?? {}))
-            .productList;
+            .productList
+            .toList();
     return productList;
   }
 
@@ -242,7 +243,7 @@ class ShopifyStore with ShopifyError {
                     (result.data!['productRecommendations'] ?? const {})[index]
               });
       var tempProducts = {"edges": newResponse};
-      return Products.fromGraphJson(tempProducts).productList;
+      return Products.fromGraphJson(tempProducts).productList.toList();
     } catch (e) {
       log(e.toString());
     }
@@ -624,7 +625,8 @@ class ShopifyStore with ShopifyError {
         await ShopifyConfig.graphQLClient!.query(_options);
     checkForError(result);
     return Products.fromGraphJson((result.data ?? const {})['products'])
-        .productList;
+        .productList
+        .toList();
   }
 
   /// Returns a List of [Metafield].
