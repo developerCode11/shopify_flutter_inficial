@@ -45,7 +45,7 @@ class ShopifyUser with _$ShopifyUser {
           : Address.fromJson(json['defaultAddress'] as Map<String, dynamic>),
       lastIncompleteCheckout: LastIncompleteCheckout.fromJson(
           json['lastIncompleteCheckout'] ?? const {}),
-      metafields: _getMetafieldList(json['metafields'] ?? const {}),
+      metafields: _getMetafieldList(json['metafields'] ?? const []),
     );
   }
 
