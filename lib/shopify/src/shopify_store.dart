@@ -1079,6 +1079,14 @@ class ShopifyStore with ShopifyError {
           );
         }
       }
+    } else if (customerId != null) {
+      await _shopifyCustomer.createMetaFieldForCustomer(
+        customerId: customerId.split('/').last,
+        namespace: 'cart',
+        key: 'cartId',
+        value: cartModel.id,
+        type: 'string',
+      );
     }
     return cartModel;
   }
