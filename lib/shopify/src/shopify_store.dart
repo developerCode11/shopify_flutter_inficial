@@ -22,6 +22,7 @@ import 'package:shopify_flutter/graphql_operations/storefront/queries/get_locali
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_product_recommendations.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_products_by_ids.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_shop.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/queries/get_video_url_by_id.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_x_collections_and_n_products_sorted.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_x_products_after_cursor.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_x_products_after_cursor_within_collection.dart';
@@ -31,6 +32,7 @@ import 'package:shopify_flutter/models/src/cart/cart_input_model.dart';
 import 'package:shopify_flutter/models/src/cart/cart_model.dart' as cart;
 import 'package:shopify_flutter/models/src/collection/collections/collections.dart';
 import 'package:shopify_flutter/models/src/collection/filters.dart';
+import 'package:shopify_flutter/models/src/product/media/video_model.dart';
 import 'package:shopify_flutter/models/src/product/metafield/metafield.dart';
 import 'package:shopify_flutter/models/src/product/product.dart';
 import 'package:shopify_flutter/models/src/product/products/products.dart';
@@ -1184,6 +1186,29 @@ class ShopifyStore with ShopifyError {
     );
     cart.Cart cartModel = cart.Cart.fromJson(result.data?['cart'] ?? {});
     return cartModel;
+  }
+
+  Future<Video> getVideoById({
+    required String id,
+    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+  }) async {
+    final WatchQueryOptions _options = WatchQueryOptions(
+      fetchPolicy: fetchPolicy,
+      document: gql(getVideoUrlById),
+      variables: {
+        'id': id,
+      },
+    );
+    final QueryResult result =
+        await ShopifyConfig.graphQLClient!.query(_options);
+    checkForError(
+      result,
+    );
+    Video video = Video(
+      thumbnail: result.data?['node']['previewImage']['url'],
+      videoUrl: result.data?['node']['sources'][0]['url'],
+    );
+    return video;
   }
 
   Future<List<Filters>> getAllFiltersByCollectionId(

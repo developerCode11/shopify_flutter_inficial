@@ -20,7 +20,8 @@ query($id : ID!, $cursor : String, $limit : Int, $sortKey : ProductCollectionSor
           node {
           metafields(identifiers: [ 
           {namespace: "reviews", key: "rating"}, 
-          {namespace: "reviews", key: "rating_count"}, 
+          {namespace: "reviews", key: "rating_count"},
+          {namespace: "custom", key: "product_reel"},
           ]) 
                    {
                       id
@@ -29,7 +30,7 @@ query($id : ID!, $cursor : String, $limit : Int, $sortKey : ProductCollectionSor
                       value
                       type
                       description
-                  }
+                      }
           options(first: 50) {
             id
             name

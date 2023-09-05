@@ -15,7 +15,8 @@ query($cursor : String, $metafieldsNamespace : String, $langCode: LanguageCode, 
         }
       metafields(identifiers: [ 
       {namespace: "reviews", key: "rating"}, 
-      {namespace: "reviews", key: "rating_count"}, 
+      {namespace: "reviews", key: "rating_count"},
+      {namespace: "custom", key: "product_reel"},
       ]) 
                {
                   id

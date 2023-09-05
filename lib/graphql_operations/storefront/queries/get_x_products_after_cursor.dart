@@ -10,7 +10,8 @@ query($cursor : String, $x : Int, $reverse: Boolean, $sortKey: ProductSortKeys, 
       node {
       metafields(identifiers: [ 
       {namespace: "reviews", key: "rating"}, 
-      {namespace: "reviews", key: "rating_count"}, 
+      {namespace: "reviews", key: "rating_count"},
+      {namespace: "custom", key: "product_reel"},
       ]) 
                {
                   id
