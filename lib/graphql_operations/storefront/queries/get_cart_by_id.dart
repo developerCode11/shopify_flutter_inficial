@@ -1,5 +1,5 @@
 /// Mutation to create a checkout
-String getCartById = r'''
+String getCartByIdQuery = r'''
 query getCartById($cartId: ID!,$langCode: LanguageCode, $countryCode: CountryCode) @inContext(language: $langCode, country: $countryCode) {
   cart(id: $cartId) {
       id

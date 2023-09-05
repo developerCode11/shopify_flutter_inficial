@@ -956,7 +956,7 @@ class ShopifyStore with ShopifyError {
 
   Future<cart.Cart> createCart({
     required CartInput input,
-    required String customerId,
+    String? customerId,
     String? langCode,
     String? countryCode,
   }) async {
@@ -981,13 +981,16 @@ class ShopifyStore with ShopifyError {
     ShopifyCustomer _shopifyCustomer = ShopifyCustomer.instance;
     cart.Cart cartModel =
         cart.Cart.fromJson(result.data?['cartCreate']['cart'] ?? {});
-    await _shopifyCustomer.createMetaFieldForCustomer(
-      customerId: customerId.split('/').last,
-      namespace: 'cart',
-      key: 'cartId',
-      value: cartModel.id,
-      type: 'string',
-    );
+    if (customerId != null) {
+      await _shopifyCustomer.createMetaFieldForCustomer(
+        customerId: customerId.split('/').last,
+        namespace: 'cart',
+        key: 'cartId',
+        value: cartModel.id,
+        type: 'string',
+      );
+    }
+
     return cartModel;
   }
 
@@ -995,6 +998,7 @@ class ShopifyStore with ShopifyError {
     required List<Lines> lines,
     required String cartId,
     String? langCode,
+    String? customerId,
     String? countryCode,
   }) async {
     final MutationOptions _options = MutationOptions(
@@ -1014,13 +1018,23 @@ class ShopifyStore with ShopifyError {
     );
     cart.Cart cartModel =
         cart.Cart.fromJson(result.data?['cartLinesAdd']['cart'] ?? {});
+    if (customerId != null) {
+      ShopifyCustomer _shopifyCustomer = ShopifyCustomer.instance;
+      await _shopifyCustomer.createMetaFieldForCustomer(
+        customerId: customerId.split('/').last,
+        namespace: 'cart',
+        key: 'cartId',
+        value: cartModel.id,
+        type: 'string',
+      );
+    }
     return cartModel;
   }
 
   Future<cart.Cart> removeLineItemsFromCart({
     required List<String> lineIds,
     required String cartId,
-    required String customerId,
+    String? customerId,
     String? langCode,
     String? countryCode,
   }) async {
@@ -1043,17 +1057,27 @@ class ShopifyStore with ShopifyError {
         cart.Cart.fromJson(result.data?['cartLinesRemove']['cart'] ?? {});
     ShopifyCustomer _shopifyCustomer = ShopifyCustomer.instance;
     if (cartModel.lines?.edges?.isEmpty ?? true) {
-      final List<Metafield> metafields = await _shopifyCustomer
-          .getMetaFieldsFromCustomer(customerId.split('/').last);
-      List<Metafield> temp = metafields
-          .where((element) =>
-              element.key == 'cartId' && element.namespace == 'cart')
-          .toList();
-      if (temp.isNotEmpty) {
-        await _shopifyCustomer.removeMetaField(
-          customerID: customerId.split('/').last,
-          metaFieldId: temp.first.id,
-        );
+      if (customerId != null) {
+        final List<Metafield> metafields = await _shopifyCustomer
+            .getMetaFieldsFromCustomer(customerId.split('/').last);
+        List<Metafield> temp = metafields
+            .where((element) =>
+                element.key == 'cartId' && element.namespace == 'cart')
+            .toList();
+        if (temp.isNotEmpty) {
+          await _shopifyCustomer.removeMetaField(
+            customerID: customerId.split('/').last,
+            metaFieldId: temp.first.id,
+          );
+        } else {
+          await _shopifyCustomer.createMetaFieldForCustomer(
+            customerId: customerId.split('/').last,
+            namespace: 'cart',
+            key: 'cartId',
+            value: cartModel.id,
+            type: 'string',
+          );
+        }
       }
     }
     return cartModel;
@@ -1064,6 +1088,7 @@ class ShopifyStore with ShopifyError {
     required String cartId,
     String? langCode,
     String? countryCode,
+    String? customerId,
   }) async {
     final MutationOptions _options = MutationOptions(
       document: gql(cartLinesUpdate),
@@ -1082,6 +1107,16 @@ class ShopifyStore with ShopifyError {
     );
     cart.Cart cartModel =
         cart.Cart.fromJson(result.data?['cartLinesUpdate']['cart'] ?? {});
+    if (customerId != null) {
+      ShopifyCustomer _shopifyCustomer = ShopifyCustomer.instance;
+      await _shopifyCustomer.createMetaFieldForCustomer(
+        customerId: customerId.split('/').last,
+        namespace: 'cart',
+        key: 'cartId',
+        value: cartModel.id,
+        type: 'string',
+      );
+    }
     return cartModel;
   }
 
@@ -1101,7 +1136,7 @@ class ShopifyStore with ShopifyError {
       if (temp.isNotEmpty) {
         final WatchQueryOptions _options = WatchQueryOptions(
           fetchPolicy: fetchPolicy,
-          document: gql(getCartById),
+          document: gql(getCartByIdQuery),
           variables: {
             'cartId': temp.first.value,
             if (langCode != null) 'langCode': langCode,
@@ -1118,6 +1153,29 @@ class ShopifyStore with ShopifyError {
       }
     }
     return null;
+  }
+
+  Future<cart.Cart> getCartById(
+      {required String cartId,
+      FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+      String? langCode,
+      String? countryCode}) async {
+    final WatchQueryOptions _options = WatchQueryOptions(
+      fetchPolicy: fetchPolicy,
+      document: gql(getCartByIdQuery),
+      variables: {
+        'cartId': cartId,
+        if (langCode != null) 'langCode': langCode,
+        if (countryCode != null) 'countryCode': countryCode,
+      },
+    );
+    final QueryResult result =
+        await ShopifyConfig.graphQLClient!.query(_options);
+    checkForError(
+      result,
+    );
+    cart.Cart cartModel = cart.Cart.fromJson(result.data?['cart'] ?? {});
+    return cartModel;
   }
 
   Future<List<Filters>> getAllFiltersByCollectionId(
