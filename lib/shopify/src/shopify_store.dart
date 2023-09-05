@@ -19,6 +19,7 @@ import 'package:shopify_flutter/graphql_operations/storefront/queries/get_all_pr
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_cart_by_id.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_collections_by_ids.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_localization.dart';
+import 'package:shopify_flutter/graphql_operations/storefront/queries/get_menu_by_handle.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_product_recommendations.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_products_by_ids.dart';
 import 'package:shopify_flutter/graphql_operations/storefront/queries/get_shop.dart';
@@ -40,6 +41,7 @@ import 'package:shopify_flutter/models/src/product/reviews/review_list_model.dar
 import 'package:shopify_flutter/models/src/product/stage_uploads/media.dart';
 import 'package:shopify_flutter/models/src/product/stage_uploads/stage_upload.dart';
 import 'package:shopify_flutter/models/src/product/stage_uploads/stage_uploads_input.dart';
+import 'package:shopify_flutter/models/src/shop/menu/menu_item.dart';
 import 'package:shopify_flutter/models/src/shop/shop.dart';
 import 'package:shopify_flutter/models/src/shop/shopify_localization.dart';
 import 'package:shopify_flutter/shopify/shopify.dart';
@@ -1209,6 +1211,35 @@ class ShopifyStore with ShopifyError {
       videoUrl: result.data?['node']['sources'][0]['url'],
     );
     return video;
+  }
+
+  Future<List<Menu>> getMenuByHandle({
+    required String handle,
+    String? langCode,
+    String? countryCode,
+    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+  }) async {
+    final WatchQueryOptions _options = WatchQueryOptions(
+      fetchPolicy: fetchPolicy,
+      document: gql(getMenuByHandleQuery),
+      variables: {
+        'handle': handle,
+        if (langCode != null) 'langCode': langCode,
+        if (countryCode != null) 'countryCode': countryCode,
+      },
+    );
+    final QueryResult result =
+        await ShopifyConfig.graphQLClient!.query(_options);
+    checkForError(
+      result,
+    );
+    if (result.data != null) {
+      List<Menu> menus = (result.data!['menu']['items'] as List)
+          .map((e) => Menu.fromJson(e))
+          .toList();
+      return menus;
+    }
+    return <Menu>[];
   }
 
   Future<List<Filters>> getAllFiltersByCollectionId(
